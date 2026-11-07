@@ -8,6 +8,10 @@ var css=':root{--cu:#B5683F;--gold:#F1DFA8;--goldd:#A9822A}'
 +'.cal:not(.ecal)>button:nth-child(7n+5)::before{content:"✦";position:absolute;top:1px;right:4px;font-size:8px;color:var(--goldd)}'
 +'.cal:not(.ecal)>button:nth-child(7n+5).today::before{color:#fff}';
 css+='.quad{grid-template-columns:1fr!important}.q{min-height:0!important}.q .ln{font-size:14.5px}.q h4{font-size:13px}';
+/* nom de l'app + manifest (automatique) */
+document.title='LAYNOOR';
+[['apple-mobile-web-app-title','LAYNOOR'],['application-name','LAYNOOR']].forEach(function(m){var e=document.querySelector('meta[name="'+m[0]+'"]');if(!e){e=document.createElement('meta');e.name=m[0];document.head.appendChild(e)}e.content=m[1]});
+if(!document.querySelector('link[rel="manifest"]')){var mf=document.createElement('link');mf.rel='manifest';mf.href='manifest.json?v=2';document.head.appendChild(mf)}
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
 var hm=new Intl.DateTimeFormat('fr-FR-u-ca-islamic-umalqura-nu-latn',{month:'long'});
@@ -75,6 +79,7 @@ function enhance(){
    cc.insertAdjacentHTML('beforeend','<div class="lg-box" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><div class="mut" style="margin-bottom:6px">Légende</div><div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px">'
     +sw('background:#C9677F','Aujourd’hui')+sw('background:var(--gold)','Vendredi (Jumu’a)')+sw('background:#fff;box-shadow:inset 0 0 0 1.5px var(--sage2)','Jour blanc (13-14-15 du mois hégirien)')+sw('background:var(--card);border:1px solid var(--line);box-shadow:inset 0 -4px 0 var(--sage2)','Lundi ou jeudi (jeûne sunna)')+sw('background:none;outline:1.5px dashed var(--sage2)','Jour à rattraper')+sw('background:var(--sage2)','Ramadan (vert)')
     +(cy?sw('background:var(--rose)','Règles (estimation)')+sw('background:var(--sage)','Fenêtre fertile')+sw('background:var(--pg2)','Ovulation probable'):'')+'</div>'+(cy?'<div class="mut" style="margin-top:8px;font-size:12px">Le petit chiffre au-dessus de la date est le jour de ton cycle. Le point sous une date indique un rendez-vous.</div>':'<div class="mut" style="margin-top:8px;font-size:12px">Le point sous une date indique un rendez-vous.</div>')+'</div>')}}
+ if(page==='enf')document.querySelectorAll('p.mut').forEach(function(x){if(x.textContent.indexOf('dans Profils')>-1)x.textContent=x.textContent.replace('dans Profils','dans Réglages › Profils')});
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw;draw=function(){_d();try{enhance()}catch(e){console.error(e)}};
@@ -268,6 +273,10 @@ sub.fam='profils';sub.enf=sub.enf||'preg';
 V.fam=function(){if(sub.fam!=='pharma')sub.fam='profils';return'<h2>Maison</h2>'+tabs('fam',[['profils','Profils'],['pharma','Pharmacie']])+V.famBody(sub.fam)};
 V.enf=function(){if(['preg','lait','crois'].indexOf(sub.enf)<0)sub.enf='preg';return'<h2>Enfant</h2>'+tabs('enf',[['preg','Grossesse'],['lait','Lait'],['crois','Croissance']])+V.famBody(sub.enf)};
 var _w=V.well;V.well=function(){if(sub.well==='preg')sub.well='cycle';return _w().replace(/<div class="tabs">[\s\S]*?<\/div>/,tabs('well',[['cycle','Cycle'],['tirage','Tirage']]))};
+
+/* ===== Profils -> Réglages ; Maison = Pharmacie ===== */
+V.fam=function(){sub.fam='pharma';return'<h2>Maison</h2>'+V.famBody('pharma')};
+var _st=V.set;V.set=function(){var h=_st(),m='<div class="card"><h3>Services</h3>';return h.indexOf(m)>-1?h.replace(m,V.famBody('profils')+m):h+V.famBody('profils')};
 
 draw();
 })();
