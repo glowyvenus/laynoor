@@ -1,8 +1,8 @@
 /* LAYNOOR – patch : aujourd'hui, Jumu'a, explication des jeûnes, météo, Qibla */
 (function(){
 var css=':root{--cu:#B5683F;--gold:#F1DFA8;--goldd:#A9822A}'
-+'.cal .today{background:var(--cu)!important;color:#fff!important;border-radius:12px;box-shadow:0 0 0 2px var(--card),0 0 0 4px #E7C3AE}'
-+'.cal .today .cn{color:#FBE6DA!important}'
++'.cal .today{background:#C9677F!important;color:#fff!important;border-radius:12px;box-shadow:0 0 0 2px var(--card),0 0 0 4px #F2C6D1}'
++'.cal .today .cn{color:#FFE3EA!important}'
 +'.cal:not(.ecal)>button{position:relative}'
 +'.cal:not(.ecal)>button:nth-child(7n+5):not(.today):not(.jb):not(.rm):not(.pd){background:var(--gold);color:#5C4713}'
 +'.cal:not(.ecal)>button:nth-child(7n+5)::before{content:"✦";position:absolute;top:1px;right:4px;font-size:8px;color:var(--goldd)}'
@@ -30,6 +30,7 @@ function loadWx(){if(busy)return;busy=true;
  if(S.loc.set)go(S.loc.lat,S.loc.lng);
  else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(p){S.loc={lat:p.coords.latitude,lng:p.coords.longitude,set:1};save();go(S.loc.lat,S.loc.lng)},function(){busy=false;alert('Localisation refusée : autorise-la pour afficher la météo.')});
  else busy=false}
+act.prd=function(id){var q=id.split('|');S.pr[q[0]]=S.pr[q[0]]||{};S.pr[q[0]][q[1]]=!S.pr[q[0]][q[1]]};
 act.wx=function(){loadWx()};
 act.goqibla=function(){page='islam';sub.islam='qibla';menuOpen=false;scrollTo(0,0)};
 
@@ -43,6 +44,17 @@ function enhance(){
  if(page==='org'&&sub.org==='agenda'){var r=why(sel);if(r.length){var done=false;
   document.querySelectorAll('p.mut').forEach(function(p){if(!done&&/jeûne recommandé|Jeûne interdit|Ramadan/.test(p.textContent)){p.innerHTML=r.join('<br>');p.style.color='var(--ink)';done=true}});
   if(!done){var e=document.getElementById('etm');if(e&&e.parentNode)e.parentNode.insertAdjacentHTML('afterend','<p class="mut" style="margin:6px 0 2px;color:var(--ink)">'+r.join('<br>')+'</p>')}}}
+
+ if(page==='org'&&sub.org==='agenda'){var fut=sel>today,cur=sel===today;
+  document.querySelectorAll('.it').forEach(function(it){var sp=it.querySelectorAll(':scope>span');if(!sp[1]||sp[1].textContent.indexOf('Prière · ')!==0)return;
+   var nm=sp[1].textContent.slice(9),k=P.find(function(q){return PF[q]===nm});if(!k)return;
+   var done=!!(S.pr[sel]||{})[k];
+   Array.prototype.slice.call(it.childNodes).forEach(function(n){if(n.nodeType===3||(n.classList&&n.classList.contains('heart')))it.removeChild(n)});
+   var h;
+   if(cur)h='<button class="heart" data-a="pr" data-id="'+k+'" aria-label="'+nm+'" style="'+(done?'color:#3B8DB5':'')+'">'+(done?'♥':'♡')+'</button>';
+   else if(fut)h='<span class="heart" style="opacity:.35">♡</span>';
+   else h='<button class="heart" data-a="prd" data-id="'+sel+'|'+k+'" aria-label="'+nm+'" style="'+(done?'font-size:22px':'')+'">'+(done?'🕌':'♡')+'</button>';
+   it.insertAdjacentHTML('beforeend',h)})}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw;draw=function(){_d();try{enhance()}catch(e){console.error(e)}};
