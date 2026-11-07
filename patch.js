@@ -262,5 +262,12 @@ BG[0][2].push(8);BG[1][2].push(16);BG[2][2].push(15);BG[3][2].push(11,12);
 BG.splice(2,0,['🍝 Base bolognaise','Une sauce préparée en grande quantité, trois plats.',[9,10]]);
 BG.push(['🥕 Base légumes','Légers, colorés, parfaits en accompagnement ou avec du riz.',[13,14]]);
 
+/* ===== Famille -> Maison ; Enfant regroupe Grossesse, Lait, Croissance ===== */
+pages.forEach(function(q){if(q[0]==='fam'){q[1]='🏡';q[2]='Maison'}});
+sub.fam='profils';sub.enf=sub.enf||'preg';
+V.fam=function(){if(sub.fam!=='pharma')sub.fam='profils';return'<h2>Maison</h2>'+tabs('fam',[['profils','Profils'],['pharma','Pharmacie']])+V.famBody(sub.fam)};
+V.enf=function(){if(['preg','lait','crois'].indexOf(sub.enf)<0)sub.enf='preg';return'<h2>Enfant</h2>'+tabs('enf',[['preg','Grossesse'],['lait','Lait'],['crois','Croissance']])+V.famBody(sub.enf)};
+var _w=V.well;V.well=function(){if(sub.well==='preg')sub.well='cycle';return _w().replace(/<div class="tabs">[\s\S]*?<\/div>/,tabs('well',[['cycle','Cycle'],['tirage','Tirage']]))};
+
 draw();
 })();
