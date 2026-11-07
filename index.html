@@ -404,6 +404,6 @@ function draw(){const h=(k,i,l)=>`<button class="${page===k?'on':''}" data-a="go
  A.innerHTML=V[page]()}
 
 draw();
-</script><script src="patch.js"></script></body></html>
+</script><script>document.write('<script src="patch.js?v='+Date.now()+'"><\/script>')</script></body></html>
 
 
