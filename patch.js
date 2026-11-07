@@ -31,6 +31,15 @@ function loadWx(){if(busy)return;busy=true;
  else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(p){S.loc={lat:p.coords.latitude,lng:p.coords.longitude,set:1};save();go(S.loc.lat,S.loc.lng)},function(){busy=false;alert('Localisation refusée : autorise-la pour afficher la météo.')});
  else busy=false}
 act.prd=function(id){var q=id.split('|');S.pr[q[0]]=S.pr[q[0]]||{};S.pr[q[0]][q[1]]=!S.pr[q[0]][q[1]]};
+act.bkex=function(){var f=new File([JSON.stringify(S)],'laynoor-sauvegarde.json',{type:'application/json'});
+ if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(function(){});
+ else{var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove()}};
+act.bkim=function(){var i=document.getElementById('bkf');if(i)i.click()};
+document.addEventListener('change',function(e){if(e.target.id!=='bkf')return;var f=e.target.files[0];if(!f)return;var r=new FileReader();
+ r.onload=function(){try{JSON.parse(r.result);if(confirm('Remplacer toutes les données de cet appareil par cette sauvegarde ?')){localStorage.setItem('laynoor',r.result);location.reload()}}catch(x){alert('Fichier de sauvegarde invalide.')}};r.readAsText(f)});
+/* icône : retire les anciens liens et force le rechargement */
+document.querySelectorAll('link[rel="apple-touch-icon"],link[rel="icon"]').forEach(function(l){l.remove()});
+['apple-touch-icon','icon'].forEach(function(rel){var l=document.createElement('link');l.rel=rel;l.href='apple-touch-icon.png?v=2';document.head.appendChild(l)});
 act.wx=function(){loadWx()};
 act.goqibla=function(){page='islam';sub.islam='qibla';menuOpen=false;scrollTo(0,0)};
 
@@ -56,6 +65,7 @@ function enhance(){
    it.insertAdjacentHTML('beforeend',h)})}
  if(page==='home'){document.querySelectorAll('.card h3').forEach(function(h){if(h.textContent.trim()==='Routines du jour'){var c=h.closest('.card');if(c)c.remove()}})}
  if(page==='home'&&!document.getElementById('qb-home')){A.insertAdjacentHTML('beforeend','<div class="card row sp" id="qb-home"><span>🕋 Qibla : <b>'+Math.round(qibla())+'°</b> <span class="mut">depuis le nord</span></span><button class="btn" data-a="goqibla">Boussole</button></div>')}
+ if(page==='set'&&!document.getElementById('bk-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="bk-card"><h3>Sauvegarde personnelle</h3><p class="mut">Tes données (prières, calendrier, cycle, famille…) vivent uniquement sur cet appareil. Exporte un fichier pour les garder en sécurité ou les retrouver ailleurs.</p><div class="row wrap"><button class="btn d" data-a="bkex">Exporter ma sauvegarde</button><button class="btn r" data-a="bkim">Importer une sauvegarde</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none"></div>')}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw;draw=function(){_d();try{enhance()}catch(e){console.error(e)}};
