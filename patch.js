@@ -39,7 +39,6 @@ function enhance(){
   if(h&&!h.dataset.p){h.dataset.p=1;var w=S.wx,fresh=w&&Date.now()-w.ts<36e5;
    if(w&&!w.err){var i=wc(w.c);h.innerHTML='<span style="font-size:22px">'+i[0]+'</span><b>'+w.t+'°</b><span class="mut">'+i[1]+' · '+w.mn+'°/'+w.mx+'° · vent '+w.v+' km/h</span>'}
    else h.innerHTML='<span class="sun"></span><b>—°</b><button class="btn" data-a="wx" style="padding:5px 12px">'+(w&&w.err?'Réessayer la météo':'Afficher la météo')+'</button>';
-   h.insertAdjacentHTML('afterend','<div class="row sp" style="margin-top:8px"><span class="mut">🕋 Qibla : '+Math.round(qibla())+'° depuis le nord</span><button class="btn" data-a="goqibla">Boussole</button></div>');
    if(S.loc.set&&!fresh&&!busy)loadWx()}}
  if(page==='org'&&sub.org==='agenda'){var r=why(sel);if(r.length){var done=false;
   document.querySelectorAll('p.mut').forEach(function(p){if(!done&&/jeûne recommandé|Jeûne interdit|Ramadan/.test(p.textContent)){p.innerHTML=r.join('<br>');p.style.color='var(--ink)';done=true}});
@@ -55,6 +54,8 @@ function enhance(){
    else if(fut)h='<span class="heart" style="opacity:.35">♡</span>';
    else h='<button class="heart" data-a="prd" data-id="'+sel+'|'+k+'" aria-label="'+nm+'" style="'+(done?'font-size:22px':'')+'">'+(done?'🕌':'♡')+'</button>';
    it.insertAdjacentHTML('beforeend',h)})}
+ if(page==='home'){document.querySelectorAll('.card h3').forEach(function(h){if(h.textContent.trim()==='Routines du jour'){var c=h.closest('.card');if(c)c.remove()}})}
+ if(page==='home'&&!document.getElementById('qb-home')){A.insertAdjacentHTML('beforeend','<div class="card row sp" id="qb-home"><span>🕋 Qibla : <b>'+Math.round(qibla())+'°</b> <span class="mut">depuis le nord</span></span><button class="btn" data-a="goqibla">Boussole</button></div>')}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw;draw=function(){_d();try{enhance()}catch(e){console.error(e)}};
