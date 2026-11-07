@@ -40,8 +40,7 @@ act.bkex=function(){var f=new File([JSON.stringify(S)],'laynoor-sauvegarde.json'
  if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(function(){});
  else{var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove()}};
 act.bkim=function(){var i=document.getElementById('bkf');if(i)i.click()};
-document.addEventListener('change',function(e){if(e.target.id!=='bkf')return;var f=e.target.files[0];if(!f)return;var r=new FileReader();
- r.onload=function(){try{JSON.parse(r.result);if(confirm('Remplacer toutes les données de cet appareil par cette sauvegarde ?')){localStorage.setItem('laynoor',r.result);location.reload()}}catch(x){alert('Fichier de sauvegarde invalide.')}};r.readAsText(f)});
+
 /* icône : retire les anciens liens et force le rechargement */
 document.querySelectorAll('link[rel="apple-touch-icon"],link[rel="icon"]').forEach(function(l){l.remove()});
 ['apple-touch-icon','icon'].forEach(function(rel){var l=document.createElement('link');l.rel=rel;l.href='apple-touch-icon.png?v=2';document.head.appendChild(l)});
@@ -70,7 +69,7 @@ function enhance(){
    it.insertAdjacentHTML('beforeend',h)})}
  if(page==='home'){document.querySelectorAll('.card h3').forEach(function(h){if(h.textContent.trim()==='Routines du jour'){var c=h.closest('.card');if(c)c.remove()}})}
  if(page==='home'&&!document.getElementById('qb-home')){A.insertAdjacentHTML('beforeend','<div class="card row sp" id="qb-home"><span>🕋 Qibla : <b>'+Math.round(qibla())+'°</b> <span class="mut">depuis le nord</span></span><button class="btn" data-a="goqibla">Boussole</button></div>')}
- if(page==='set'&&!document.getElementById('bk-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="bk-card"><h3>Sauvegarde personnelle</h3><p class="mut">Tes données (prières, calendrier, cycle, famille…) vivent uniquement sur cet appareil. Exporte un fichier pour les garder en sécurité ou les retrouver ailleurs.</p><div class="row wrap"><button class="btn d" data-a="bkex">Exporter ma sauvegarde</button><button class="btn r" data-a="bkim">Importer une sauvegarde</button></div><input type="file" id="bkf" accept=".json,application/json" style="display:none"></div>')}
+ if(page==='set'&&!document.getElementById('bk-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="bk-card"><h3>Sauvegarde personnelle</h3><p class="mut">Tes données vivent uniquement sur cet appareil. Dernière sauvegarde : '+(S.lastBk?new Date(S.lastBk).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}):'jamais')+'.</p><div class="row wrap"><button class="btn d" data-a="bkex">Exporter (sans photos)</button><button class="btn" data-a="bkexp">Exporter avec photos</button><button class="btn r" data-a="bkim">Importer</button></div><p class="mut">Après l’export, choisis « Enregistrer dans Fichiers » dans le menu qui s’ouvre. La version avec photos est plus lourde.</p><input type="file" id="bkf" accept=".json,application/json" style="display:none"></div>')}
  if(page==='org'&&sub.org==='agenda'&&!document.getElementById('ics-card')){var o=S.icsOpt||{ev:1,fast:1,pr:0},ck=function(k,l){return'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ics-'+k+'" '+(o[k]?'checked':'')+' style="width:auto"> '+l+'</label>'};
   A.insertAdjacentHTML('beforeend','<div class="card" id="ics-card"><h3>Calendrier Apple</h3><p class="mut">Exporte tes rendez-vous vers l’app Calendrier de ton iPhone. C’est une copie à un instant donné : les changements faits ensuite dans LAYNOOR demandent un nouvel export.</p>'+ck('ev','Mes rendez-vous et événements')+ck('fast','Jours de jeûne recommandés (3 prochains mois)')+ck('pr','Horaires de prière (7 prochains jours)')+'<p><button class="btn d" data-a="icsx">Ajouter à Calendrier Apple</button></p><p class="mut">Ton suivi de cycle n’est jamais inclus. Réexporter ne crée pas de doublons.</p></div>')}
  if(page==='souv')svLoad();
@@ -110,6 +109,7 @@ V.cuis=function(){if(sub.cuis==='batch')sub.cuis='rec';
  var t=tabs('cuis',[['menu','Menus'],['rec','Batch & recettes'],['courses','Courses'],['placard','Placard']]);
  if(sub.cuis==='rec')return'<h2>Cuisine</h2>'+t+batchView();
  if(sub.cuis==='menu')return'<h2>Cuisine</h2>'+t+menuView();
+ if(sub.cuis==='courses')return'<h2>Cuisine</h2>'+t+coursesView();
  return _cu().replace(/<div class="tabs">[\s\S]*?<\/div>/,t)};
 
 /* ===== Export calendrier Apple (.ics) ===== */
@@ -135,7 +135,7 @@ var db,SVL=[],SVI=0,tu={},fu={};
 function idb(){return new Promise(function(res,rej){if(db)return res(db);var r=indexedDB.open('laynoor-souv',1);r.onupgradeneeded=function(){r.result.createObjectStore('p',{keyPath:'id'})};r.onsuccess=function(){db=r.result;res(db)};r.onerror=function(){rej(r.error)}})}
 function tx(mode,fn){return idb().then(function(d){return new Promise(function(res,rej){var t=d.transaction('p',mode),q=fn(t.objectStore('p'));t.oncomplete=function(){res(q&&q.result)};t.onerror=function(){rej(t.error)}})})}
 function rs(file,max,q){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej()},'image/jpeg',q)};im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u})}
-V.souv=function(){return'<h2>Souvenirs</h2><div class="card"><p class="mut">Importe tes photos et ajoute une légende : elles restent uniquement sur cet appareil et sont compressées pour économiser la place.</p><button class="btn d" id="sv-add">📸 Ajouter des photos</button><input type="file" id="sv-file" accept="image/*" multiple style="display:none"><p class="mut" id="sv-msg"></p></div><div id="sv-grid"></div><p class="mut">Les photos ne sont pas incluses dans la sauvegarde de Réglages : garde aussi tes originaux dans Photos.</p>'};
+V.souv=function(){return'<h2>Souvenirs</h2><div class="card"><p class="mut">Dépose ici tes photos, les premiers pas, les dessins, les petits moments à garder… Ajoute une légende : tout reste uniquement sur cet appareil, et les photos sont compressées pour économiser la place.</p><button class="btn d" id="sv-add">📸 Ajouter des photos</button><input type="file" id="sv-file" accept="image/*" multiple style="display:none"><p class="mut" id="sv-msg"></p></div><div id="sv-grid"></div><p class="mut">Les photos ne sont pas incluses dans la sauvegarde de Réglages : garde aussi tes originaux dans Photos.</p>'};
 function svLoad(){tx('readonly',function(s){return s.getAll()}).then(function(a){var g=document.getElementById('sv-grid');if(!g)return;
  SVL=(a||[]).sort(function(x,y){return y.d.localeCompare(x.d)||y.id-x.id});
  if(!SVL.length){g.innerHTML='<div class="card"><p class="mut">Aucune photo pour l’instant. Ajoute ton premier souvenir ♡</p></div>';return}
@@ -204,10 +204,10 @@ act.qadj=function(id){var q=id.split('|'),c=S.qr.ch.find(function(x){return x.id
 function coranView(){var b='<div class="card"><h3>Mes défis</h3>'+(S.qr.ch.map(function(c){var rd=qread(c),g=qpg(c),n=g[today]||0,pct=Math.min(100,Math.round(rd/c.total*100)),dn=Object.keys(g).length;
   return'<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div class="row sp"><b>'+esc(c.name)+'</b><button class="x" data-a="qdel" data-id="'+c.id+'" aria-label="Supprimer">×</button></div><div style="height:8px;background:var(--line);border-radius:8px;margin:6px 0"><div style="height:8px;width:'+pct+'%;background:var(--sage2);border-radius:8px"></div></div><div class="mut">'+rd+' / '+c.total+' '+c.unit+' · '+pct+'% · '+dn+' jour'+(dn>1?'s':'')+' de lecture · objectif : '+c.per+' '+c.unit+' par jour</div><div class="row sp" style="margin-top:8px"><span>Aujourd’hui</span><span class="row"><button class="btn" data-a="qadj" data-id="'+c.id+'|-1" aria-label="Moins">−</button><b style="min-width:42px;text-align:center;font-size:18px">'+n+'</b><button class="btn" data-a="qadj" data-id="'+c.id+'|1" aria-label="Plus">+</button>'+(c.per>1?'<button class="btn r" data-a="qadj" data-id="'+c.id+'|'+c.per+'">+'+c.per+'</button>':'')+'</span></div></div>'}).join('')||'<p class="mut">Aucun défi pour l’instant. Choisis-en un ci-dessous.</p>')+'</div>';
  b+='<div class="card"><h3>Lancer un défi</h3>'+QC.map(function(c,i){return'<div class="it"><span>'+c[0]+'<div class="mut">'+c[4]+'</div></span><button class="btn" data-a="qadd" data-id="'+i+'">Commencer</button></div>'}).join('')+'<p class="mut">Le mushaf de Médine compte 604 pages. Ajuste le nombre de pages lues avec + et −, ou touche « +'+'20 » pour ajouter ton objectif d’un coup.</p></div>';return b}
-if(sub.islam==='qibla')sub.islam='rappels';
+if(sub.islam==='qibla'||sub.islam==='rappels')sub.islam='dhikr';
 var _is=V.islam;
-V.islam=function(){var k=sub.islam;if(k==='qibla'||k==='apprendre')k=sub.islam='prieres';
- var tb=tabs('islam',[['rappels','Rappels'],['prieres','Prières & Qibla'],['dhikr','Dhikr'],['jeune','Jeûne'],['coran','Coran'],['mosquee','Mosquées']]);
+V.islam=function(){var k=sub.islam;if(k==='qibla'||k==='apprendre'||k==='mosquee')k=sub.islam='prieres';
+ var tb=tabs('islam',[['dhikr','Dhikr'],['prieres','Prières & Qibla'],['rappels','Rappels'],['jeune','Jeûne'],['coran','Coran']]);
  if(k==='rappels')return'<h2>Islam</h2>'+tb+rappelsView();
  if(k==='prieres')return'<h2>Islam</h2>'+tb+prayView();
  if(k==='coran')return'<h2>Islam</h2>'+tb+coranView();
@@ -277,6 +277,79 @@ var _w=V.well;V.well=function(){if(sub.well==='preg')sub.well='cycle';return _w(
 /* ===== Profils -> Réglages ; Maison = Pharmacie ===== */
 V.fam=function(){sub.fam='pharma';return'<h2>Maison</h2>'+V.famBody('pharma')};
 var _st=V.set;V.set=function(){var h=_st(),m='<div class="card"><h3>Services</h3>';return h.indexOf(m)>-1?h.replace(m,V.famBody('profils')+m):h+V.famBody('profils')};
+
+/* ===== Courses modifiables ===== */
+function coursesView(){var L=S.shop,h='<div class="card"><h3>Liste de courses</h3>'+(L.map(function(x){var fr=x.from?(x.from==='rec'?'recette':x.from+'.'):'';
+  return'<div class="it" style="align-items:flex-start">'+heartBtn(x.d,'shop',x.id)+'<div style="flex:1;min-width:0"><input class="ln" data-a="edshop" data-id="'+x.id+'" value="'+esc(x.t)+'" aria-label="Article" style="width:100%">'+(fr?'<div class="mut" style="font-size:11px;margin-left:2px">pour '+esc(fr)+'</div>':'')+'</div><input data-a="edqty" data-id="'+x.id+'" value="'+esc(x.q||'')+'" placeholder="Qté" aria-label="Quantité" style="width:80px;text-align:center"><button class="x" data-a="delshop" data-id="'+x.id+'" aria-label="Retirer">×</button></div>'}).join('')||'<p class="mut">Liste vide.</p>');
+ h+='<div class="row" style="margin-top:12px"><input id="sh-n" placeholder="Article" style="flex:1"><input id="sh-q" placeholder="Qté" style="width:80px;text-align:center"><button class="btn d" data-a="addshop2" aria-label="Ajouter">+</button></div><div class="row wrap" style="margin-top:8px"><button class="btn r" data-a="clearshop">Retirer les articles cochés</button></div><p class="mut">Touche un article ou sa quantité pour les modifier (ex. « Riz » et « 500 g »).</p></div>';return h}
+act.addshop2=function(){var n=document.getElementById('sh-n'),q=document.getElementById('sh-q'),t=n&&n.value.trim();if(!t)return;S.shop.push({id:Date.now()+Math.random(),t:t,q:q?q.value.trim():'',d:0})};
+document.addEventListener('change',function(e){var t=e.target,a=t.dataset&&t.dataset.a;if(a!=='edshop'&&a!=='edqty')return;e.stopImmediatePropagation();var x=S.shop.find(function(z){return z.id==t.dataset.id});if(!x)return;
+ if(a==='edqty'){x.q=t.value.trim();save();return}
+ var v=t.value.trim();if(v){x.t=v;save()}else{S.shop=S.shop.filter(function(z){return z!==x});save();draw()}},true);
+document.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var id=e.target.id;if(id==='sh-n'||id==='sh-q'){act.addshop2();save();draw();var n=document.getElementById('sh-n');if(n)n.focus()}});
+
+/* ===== Prières & Qibla + Mosquées ===== */
+function mosqueCard(){var g=function(q){return'https://www.google.com/maps/search/'+encodeURIComponent(q)};return'<div class="card"><h3>Trouver une mosquée</h3><p class="mut">Ouvre Google Maps avec la recherche choisie.</p>'+[['🕌 Mosquées près de moi','mosquée près de moi'],['🌸 Avec espace femmes','mosquée avec espace femmes près de moi'],['💧 Avec salle d’ablutions','mosquée avec ablutions près de moi']].map(function(x){return'<p><a class="btn" style="display:block;text-decoration:none" target="_blank" rel="noopener" href="'+g(x[1])+'">'+x[0]+'</a></p>'}).join('')+'<p class="mut">Vérifie sur place ou par téléphone : les équipements varient.</p></div>'}
+var _pv=prayView;prayView=function(){return _pv()+mosqueCard()};
+
+/* ===== Maison : Pharmacie + stock de lait ; Enfant : Croissance, Dents, Étapes, Grossesse ===== */
+V.fam=function(){if(sub.fam!=='lait')sub.fam='pharma';return'<h2>Maison</h2>'+tabs('fam',[['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock'):V.famBody('pharma'))};
+sub.enf='crois';
+var TT=[['55','Deuxième molaire supérieure droite','25–33'],['54','Première molaire supérieure droite','13–19'],['53','Canine supérieure droite','16–22'],['52','Incisive latérale supérieure droite','9–13'],['51','Incisive centrale supérieure droite','8–12'],['61','Incisive centrale supérieure gauche','8–12'],['62','Incisive latérale supérieure gauche','9–13'],['63','Canine supérieure gauche','16–22'],['64','Première molaire supérieure gauche','13–19'],['65','Deuxième molaire supérieure gauche','25–33'],['85','Deuxième molaire inférieure droite','23–31'],['84','Première molaire inférieure droite','14–18'],['83','Canine inférieure droite','17–23'],['82','Incisive latérale inférieure droite','10–16'],['81','Incisive centrale inférieure droite','6–10'],['71','Incisive centrale inférieure gauche','6–10'],['72','Incisive latérale inférieure gauche','10–16'],['73','Canine inférieure gauche','17–23'],['74','Première molaire inférieure gauche','14–18'],['75','Deuxième molaire inférieure gauche','23–31']];
+var MS=[[2,'2 mois',['Sourit en réponse à ton sourire ou à ta voix','Suit un objet ou ton visage des yeux','Lève la tête quelques secondes sur le ventre','Se calme quand on lui parle ou qu’on le prend']],
+[4,'4 mois',['Rit aux éclats','Tient sa tête sans soutien','Porte ses mains ou un jouet à la bouche','Attrape un jouet qu’on lui tend','Se redresse sur les avant-bras sur le ventre']],
+[6,'6 mois',['Se retourne dans les deux sens','Babille (« ba », « ma », « da »)','Tient assis avec un appui','Passe un jouet d’une main à l’autre','Réagit à son prénom']],
+[9,'9 mois',['Tient assis seul','Se déplace (ramper, quatre pattes, sur les fesses)','Fait « au revoir » ou « coucou »','Joue à « coucou-caché »','Prend de petites choses avec ses doigts']],
+[12,'12 mois',['Se met debout en s’agrippant','Marche en se tenant aux meubles','Dit « papa » ou « maman » avec sens','Prend de petits objets entre le pouce et l’index','Montre du doigt ce qu’il veut']],
+[15,'15 mois',['Fait ses premiers pas seul','Dit quelques mots en plus de « papa » et « maman »','Empile deux cubes','Imite des gestes de la vie quotidienne']],
+[18,'18 mois',['Marche seul avec assurance','Boit seul au verre','Mange seul avec ses doigts','Montre du doigt pour partager ce qui l’intéresse']],
+[24,'2 ans',['Court','Monte les marches avec un appui','Associe deux mots (« encore lait »)','Comprend des consignes simples','Joue à faire semblant']],
+[36,'3 ans',['Fait des phrases de plusieurs mots','Pédale sur un tricycle','Dessine un cercle','Joue avec d’autres enfants']]];
+var TS={c:null,sel:null};
+function kids2(){return S.fam.filter(function(f){return f.r==='Enfant'})}
+function kidBar(K){if(!K.some(function(f){return f.id==TS.c}))TS.c=K[0].id;return'<div class="tabs">'+K.map(function(f){return'<button class="'+(f.id==TS.c?'on':'')+'" data-a="tkid" data-id="'+f.id+'">'+esc(f.n)+'</button>'}).join('')+'</div>'}
+act.tkid=function(id){TS.c=id;TS.sel=null};
+act.tooth=function(id){S.teeth=S.teeth||{};var t=S.teeth[TS.c]=S.teeth[TS.c]||{};if(t[id])delete t[id];else t[id]=today;TS.sel=id};
+act.mile=function(id){var q=id.split('|');S.miles=S.miles||{};var m=S.miles[q[0]]=S.miles[q[0]]||{};if(m[q[1]])delete m[q[1]];else m[q[1]]=today};
+document.addEventListener('change',function(e){var t=e.target;if(!t.dataset||t.dataset.a!=='tdate')return;e.stopImmediatePropagation();var T=(S.teeth||{})[TS.c];if(T&&t.value){T[t.dataset.id]=t.value;save();draw()}},true);
+function arch(j,T){var cy=j?190:162,ry=118,s='';TT.slice(j*10,j*10+10).forEach(function(t,i){var th=Math.PI-(i+.5)*Math.PI/10,x=160+128*Math.cos(th),y=j?cy+ry*Math.sin(th):cy-ry*Math.sin(th),k=+t[0].slice(1),r=[0,13,12,13,16,18][k],on=!!T[t[0]],se=TS.sel===t[0];
+ s+='<g data-a="tooth" data-id="'+t[0]+'" style="cursor:pointer"><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" style="fill:'+(on?'var(--heart)':'var(--card)')+';stroke:'+(se?'var(--ink)':'var(--sage2)')+';stroke-width:'+(se?3:1.5)+'"/><text x="'+x.toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="middle" font-size="10" style="fill:'+(on?'#fff':'var(--mut)')+';pointer-events:none">'+k+'</text></g>'});return s}
+function noKid(t){return'<div class="card"><p class="mut">Ajoute un enfant dans Réglages › Profils pour suivre '+t+'.</p></div>'}
+function dentsView(){var K=kids2();if(!K.length)return noKid('ses dents');var bar=kidBar(K),kid=K.find(function(f){return f.id==TS.c}),T=(S.teeth||{})[kid.id]||{},n=Object.keys(T).length;
+ var sel=TS.sel&&TT.find(function(t){return t[0]===TS.sel});
+ var panel=sel?'<div class="card" style="background:var(--rose)"><b>'+sel[1]+'</b><div class="mut">Sortie habituelle : '+sel[2]+' mois</div>'+(T[sel[0]]?'<div class="row" style="margin-top:8px"><span>♥ Sortie le</span><input type="date" data-a="tdate" data-id="'+sel[0]+'" value="'+T[sel[0]]+'" style="flex:1"></div>'+(kid.b?'<div class="mut">À '+ageTxt(kid.b,T[sel[0]])+'</div>':''):'<div class="mut" style="margin-top:6px">Pas encore sortie. Touche la dent pour la cocher.</div>')+'</div>':'<p class="mut">Touche une dent pour la cocher quand elle est sortie.</p>';
+ var list=TT.filter(function(t){return T[t[0]]}).sort(function(a,b){return T[a[0]].localeCompare(T[b[0]])});
+ return bar+'<div class="card"><div class="row sp"><h3>Dents de lait</h3><b>'+n+' / 20</b></div><svg viewBox="0 0 320 350" width="100%" role="img" aria-label="Schéma de dentition"><text x="160" y="104" text-anchor="middle" font-size="11" style="fill:var(--mut)">Haut</text><text x="160" y="256" text-anchor="middle" font-size="11" style="fill:var(--mut)">Bas</text>'+arch(0,T)+arch(1,T)+'</svg><p class="mut" style="font-size:12px">1 = incisive centrale · 2 = incisive latérale · 3 = canine · 4 = 1ʳᵉ molaire · 5 = 2ᵉ molaire. Rose plein = dent sortie. Droite et gauche sont celles de l’enfant.</p></div>'+panel
+  +(list.length?'<div class="card"><h3>Dents sorties</h3>'+list.map(function(t){return'<div class="it"><span>'+t[1]+'<div class="mut">'+fd(T[t[0]])+(kid.b?' · à '+ageTxt(kid.b,T[t[0]]):'')+'</div></span></div>'}).join('')+'</div>':'')
+  +'<p class="mut">Les âges sont des repères : chaque enfant a son rythme, avec parfois plusieurs mois d’écart. En cas de doute, demande à ton dentiste ou à ton pédiatre.</p>'}
+function etapesView(){var K=kids2();if(!K.length)return noKid('ses étapes');var bar=kidBar(K),kid=K.find(function(f){return f.id==TS.c}),M=(S.miles||{})[kid.id]||{},mo=kid.b?difD(today,kid.b)/30.4375:null,cur=-1;
+ if(mo!=null){cur=MS.findIndex(function(g){return mo<=g[0]});if(cur<0)cur=MS.length-1}
+ var h=bar+'<p class="mut">Coche chaque étape quand elle est acquise. Ce sont des repères, pas un test : chaque enfant avance à son rythme.</p>';
+ MS.forEach(function(g,gi){var d=0;g[2].forEach(function(t,i){if(M['g'+gi+'i'+i])d++});
+  h+='<div class="card"><details '+(gi===cur?'open':'')+'><summary><b>'+g[1]+'</b> <span class="mut">'+d+' / '+g[2].length+'</span>'+(gi===cur?' <span class="mut">· âge de '+esc(kid.n)+'</span>':'')+'</summary>'+g[2].map(function(t,i){var k='g'+gi+'i'+i,on=!!M[k];return'<div class="it">'+heartBtn(on,'mile',kid.id+'|'+k)+'<span>'+esc(t)+(on?'<div class="mut" style="font-size:11px">le '+fd(M[k])+'</div>':'')+'</span></div>'}).join('')+'</details></div>'});
+ return h+'<p class="mut">Si une étape tarde beaucoup ou si tu t’inquiètes, parles-en à ton pédiatre : le carnet de santé fait foi.</p>'}
+V.enf=function(){if(['crois','dents','etapes','preg'].indexOf(sub.enf)<0)sub.enf='crois';var k=sub.enf;
+ return'<h2>Enfant</h2>'+tabs('enf',[['crois','Croissance'],['dents','Dents'],['etapes','Étapes'],['preg','Grossesse']])+(k==='dents'?dentsView():k==='etapes'?etapesView():V.famBody(k))};
+
+/* ===== Sauvegarde plus fiable (avec photos) ===== */
+function b2d(b){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result)};r.readAsDataURL(b)})}
+function bkDl(f){var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove()}
+function bkShare(f){if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f]}).catch(function(e){if(e&&e.name!=='AbortError')bkDl(f)});bkDl(f);return Promise.resolve()}
+function bkSheet(f){var v=document.createElement('div');v.style.cssText='position:fixed;inset:0;background:rgba(20,12,12,.6);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px';
+ v.innerHTML='<div class="card" style="max-width:360px;text-align:center"><h3>Sauvegarde prête ♡</h3><p class="mut">Touche le bouton, puis « Enregistrer dans Fichiers ».</p><p><button class="btn d" id="bk-go">Enregistrer / partager</button></p><button class="btn r" id="bk-x">Annuler</button></div>';document.body.appendChild(v);
+ document.getElementById('bk-go').onclick=function(){bkShare(f).then(function(){v.remove()})};document.getElementById('bk-x').onclick=function(){v.remove()}}
+act.bkex=function(){var a=document.activeElement;if(a&&a.blur)a.blur();S.lastBk=Date.now();save();bkShare(new File([JSON.stringify({app:'laynoor',v:2,date:new Date().toISOString(),data:S})],'laynoor-sauvegarde.json',{type:'application/json'}))};
+act.bkexp=function(){var a=document.activeElement;if(a&&a.blur)a.blur();
+ tx('readonly',function(s){return s.getAll()}).then(function(ps){return Promise.all((ps||[]).map(function(r){return Promise.all([b2d(r.full),b2d(r.th)]).then(function(b){return{id:r.id,d:r.d,cap:r.cap,full:b[0],th:b[1]}})}))}).then(function(arr){S.lastBk=Date.now();save();bkSheet(new File([JSON.stringify({app:'laynoor',v:2,date:new Date().toISOString(),data:S,photos:arr})],'laynoor-sauvegarde-photos.json',{type:'application/json'}))}).catch(function(){alert('Impossible de lire les photos pour la sauvegarde.')})};
+document.addEventListener('change',function(e){if(e.target.id!=='bkf')return;var f=e.target.files[0];if(!f)return;var r=new FileReader();
+ r.onload=function(){var o;try{o=JSON.parse(r.result)}catch(x){alert('Fichier de sauvegarde invalide.');return}
+  var data=o&&o.app==='laynoor'&&o.data?o.data:o;if(!data||typeof data!=='object'||Array.isArray(data)){alert('Fichier de sauvegarde invalide.');return}
+  var ph=o.photos||[],np=ph.length;
+  if(!confirm('Remplacer toutes les données de cet appareil par cette sauvegarde'+(o.date?' du '+new Date(o.date).toLocaleDateString('fr-FR'):'')+' ?\n'+((data.ev||[]).length)+' rendez-vous'+(np?', '+np+' photos':'')+'.'))return;
+  var done=function(){try{localStorage.setItem('laynoor',JSON.stringify(data))}catch(x){alert('Impossible d’écrire la sauvegarde sur cet appareil.');return}alert('Sauvegarde restaurée ♡');location.reload()};
+  if(!np){done();return}
+  var i=0;(function nx(){if(i>=np){done();return}var p=ph[i++];Promise.all([fetch(p.full).then(function(x){return x.blob()}),fetch(p.th).then(function(x){return x.blob()})]).then(function(b){return svPut({id:p.id,d:p.d,cap:p.cap||'',full:b[0],th:b[1]})}).then(nx).catch(nx)})()};
+ r.readAsText(f)});
 
 draw();
 })();
