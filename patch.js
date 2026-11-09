@@ -70,8 +70,8 @@ function enhance(){
  if(page==='home'){document.querySelectorAll('.card h3').forEach(function(h){if(h.textContent.trim()==='Routines du jour'){var c=h.closest('.card');if(c)c.remove()}})}
  if(page==='home'&&!document.getElementById('qb-home')){A.insertAdjacentHTML('beforeend','<div class="card row sp" id="qb-home"><span>🕋 Qibla : <b>'+Math.round(qibla())+'°</b> <span class="mut">depuis le nord</span></span><button class="btn" data-a="goqibla">Boussole</button></div>')}
  if(page==='set'&&!document.getElementById('bk-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="bk-card"><h3>Sauvegarde personnelle</h3><p class="mut">Tes données vivent uniquement sur cet appareil, et séparément pour Safari et pour le raccourci (tu es dans : '+(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)?'le raccourci':'Safari')+'). Dernière sauvegarde : '+(S.lastBk?new Date(S.lastBk).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}):'jamais')+'.</p><div class="row wrap"><button class="btn d" data-a="bkex">Exporter (sans photos)</button><button class="btn" data-a="bkexp">Exporter avec photos</button><button class="btn r" data-a="bkim">Importer</button></div><p class="mut">Après l’export, choisis « Enregistrer dans Fichiers » dans le menu qui s’ouvre. La version avec photos est plus lourde.</p><input type="file" id="bkf" accept=".json,application/json" style="display:none"></div>')}
- if(page==='org'&&sub.org==='agenda'&&!document.getElementById('ics-card')){var o=S.icsOpt||{ev:1,fast:1,pr:0},ck=function(k,l){return'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ics-'+k+'" '+(o[k]?'checked':'')+' style="width:auto"> '+l+'</label>'};
-  A.insertAdjacentHTML('beforeend','<div class="card" id="ics-card"><h3>Calendrier Apple</h3><p class="mut">Exporte tes rendez-vous vers l’app Calendrier de ton iPhone. C’est une copie à un instant donné : les changements faits ensuite dans LAYNOOR demandent un nouvel export.</p>'+ck('ev','Mes rendez-vous et événements')+ck('fast','Jours de jeûne recommandés (3 prochains mois)')+ck('pr','Horaires de prière (7 prochains jours)')+'<p><button class="btn d" data-a="icsx">Ajouter à Calendrier Apple</button></p><p class="mut">Ton suivi de cycle n’est jamais inclus. Réexporter ne crée pas de doublons.</p></div>')}
+ if(page==='org'&&sub.org==='agenda'&&!document.getElementById('ics-card')){var o=Object.assign({ev:1,fast:1,pr:0,kahf:1},S.icsOpt||{}),ck=function(k,l){return'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="ics-'+k+'" '+(o[k]?'checked':'')+' style="width:auto"> '+l+'</label>'};
+  A.insertAdjacentHTML('beforeend','<div class="card" id="ics-card"><h3>Calendrier Apple</h3><p class="mut">Exporte tes rendez-vous vers l’app Calendrier de ton iPhone. C’est une copie à un instant donné : les changements faits ensuite dans LAYNOOR demandent un nouvel export.</p>'+ck('ev','Mes rendez-vous et événements')+ck('fast','Jours de jeûne recommandés (3 prochains mois)')+ck('pr','Horaires de prière (7 prochains jours)')+ck('kahf','Rappel du vendredi : sourate Al-Kahf (3 mois)')+'<p><button class="btn d" data-a="icsx">Ajouter à Calendrier Apple</button></p><p class="mut">Ton suivi de cycle n’est jamais inclus. Réexporter ne crée pas de doublons.</p></div>')}
  if(page==='souv')svLoad();
  if(page==='org'&&sub.org==='agenda'){var cg=document.querySelector('.cal:not(.ecal)'),cc=cg&&cg.closest('.card');
   if(cc&&!cc.querySelector('.lg-box')){var sw=function(s,l){return'<span style="display:inline-flex;align-items:center;gap:6px"><i style="display:inline-block;width:16px;height:16px;border-radius:5px;'+s+'"></i>'+l+'</span>'},cy=S.showCyc!==false&&S.cyc&&S.cyc.start;
@@ -92,6 +92,13 @@ function enhance(){
  if(page==='home'&&new Date().getDay()===5&&!document.getElementById('kahf-card')){var pr0=A.querySelector('.pr');
   if(pr0)pr0.insertAdjacentHTML('afterend','<div class="card" id="kahf-card"><div class="row sp"><div><b>📖 Vendredi : sourate Al-Kahf</b><div class="mut">Lis-la ou écoute-la aujourd’hui (de jeudi soir à vendredi soir).</div></div>'+heartBtn((S.kahf||{})[today],'kahf','x')+'</div><p style="margin:8px 0 4px"><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://quran.com/18">Lire ou écouter</a></p><div class="mut" style="font-size:11.5px">Rapporté par al-Hakim et al-Bayhaqi (Abu Sa‘id al-Khudri), jugé bon (hasan) par Ibn Hajar.</div></div>')}
  if(page==='fam'&&sub.fam==='lait')dropFx();
+ if(page==='org'&&sub.org==='agenda'){var lg=document.querySelector('.lg-box');
+  if(lg&&!lg.dataset.t){lg.dataset.t=1;var hd=lg.firstElementChild;if(hd){hd.className='row sp';hd.style.marginBottom='6px';hd.innerHTML='<span class="mut">Légende</span><button class="btn" data-a="leg" style="padding:4px 12px;font-size:12px">'+(S.legHide?'Afficher':'Masquer')+'</button>';if(S.legHide)Array.prototype.slice.call(lg.children,1).forEach(function(c){c.style.display='none'})}}
+  var gb=A.querySelector('button[data-a="gh"]');
+  if(gb&&gb.parentElement&&!document.getElementById('kahf-row')){var kd=(S.kahf||{})[sel];gb.parentElement.insertAdjacentHTML('afterend','<div class="row" id="kahf-row" style="margin:6px 0"><button class="heart" data-a="kahfd" data-id="'+sel+'" aria-label="Fait">'+(kd?'♥':'♡')+'</button><span>📖 Sourate Al-Kahf (lire ou écouter) · <a href="https://quran.com/18" target="_blank" rel="noopener">ouvrir</a></span></div>')}}
+ if(page==='home'&&navigator.onLine===false&&!document.getElementById('off-warn'))A.insertAdjacentHTML('afterbegin','<div class="card" id="off-warn" style="background:var(--sage)"><div class="mut">📴 Hors connexion : tout fonctionne, sauf la météo et les liens externes.</div></div>');
+ if(page==='set'&&!document.getElementById('off-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="off-card"><h3>Hors connexion</h3><p class="mut" id="off-msg">Vérification…</p></div>');
+  var om=document.getElementById('off-msg');(window.caches?caches.has('laynoor-v1'):Promise.resolve(false)).then(function(ok){if(!om)return;om.textContent=ok&&navigator.serviceWorker&&navigator.serviceWorker.controller?'✅ Prêt : l’app s’ouvre sans internet. Il te faut internet seulement pour la météo, les liens (Mawaqit, Quran.com, Google Maps) et les mises à jour.':'⏳ Pas encore prêt : ouvre l’app une fois avec internet, puis ferme-la et rouvre-la.'}).catch(function(){})}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -131,7 +138,7 @@ V.cuis=function(){if(sub.cuis==='batch')sub.cuis='rec';
  return _cu().replace(/<div class="tabs">[\s\S]*?<\/div>/,t)};
 
 /* ===== Export calendrier Apple (.ics) ===== */
-document.addEventListener('change',function(e){var m=/^ics-(ev|fast|pr)$/.exec(e.target.id||'');if(!m)return;S.icsOpt=S.icsOpt||{ev:1,fast:1,pr:0};S.icsOpt[m[1]]=e.target.checked?1:0;save()});
+document.addEventListener('change',function(e){var m=/^ics-(ev|fast|pr|kahf)$/.exec(e.target.id||'');if(!m)return;S.icsOpt=Object.assign({ev:1,fast:1,pr:0,kahf:1},S.icsOpt||{});S.icsOpt[m[1]]=e.target.checked?1:0;save()});
 function icsBuild(o){var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LAYNOOR//FR','CALSCALE:GREGORIAN','X-WR-CALNAME:LAYNOOR'],st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',z=function(n){return String(n).padStart(2,'0')},ds=function(d){return d.replace(/-/g,'')},es=function(s){return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n')};
  function ev(uid,title,date,time,mins){L.push('BEGIN:VEVENT','UID:'+uid+'@laynoor','DTSTAMP:'+st,'SUMMARY:'+es(title));
   if(/^\d\d:\d\d$/.test(time||'')){var m=+time.slice(0,2)*60+ +time.slice(3)+mins,ed=m>=1440?addD(date,1):date;L.push('DTSTART:'+ds(date)+'T'+time.replace(':','')+'00','DTEND:'+ds(ed)+'T'+z(Math.floor(m/60)%24)+z(m%60)+'00')}
@@ -140,9 +147,10 @@ function icsBuild(o){var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LAYNOOR//
  if(o.ev)S.ev.forEach(function(e){if(e.date&&e.t)ev('ev-'+e.id,e.t,e.date,e.time||'',60)});
  if(o.fast)for(var i=0;i<90;i++){var d=addD(today,i),x=fi(d);if(x.no)continue;var t=x.ram?'Ramadan':x.jb?'Jeûne recommandé (jour blanc)':x.lj?'Jeûne recommandé (lundi ou jeudi)':'';if(t)ev('fast-'+d,t,d,'',0)}
  if(o.pr)for(var j=0;j<7;j++){var dd=addD(today,j),tt=times(new Date(dd+'T12:00'),S.loc.lat,S.loc.lng,S.ang);P.forEach(function(q){var f=fmt(tt[q]);if(/^\d\d:\d\d$/.test(f))ev('pr-'+dd+'-'+q,'Prière · '+PF[q],dd,f,20)})}
+ if(o.kahf)for(var w=0;w<13;w++){var fd2=addD(today,w*7+((5-new Date(today+'T12:00').getDay()+7)%7));ev('kahf-'+fd2,'Sourate Al-Kahf (vendredi)',fd2,'',0)}
  L.push('END:VCALENDAR');return L.join('\r\n')}
-act.icsx=function(){var o={ev:+!!(document.getElementById('ics-ev')||{}).checked,fast:+!!(document.getElementById('ics-fast')||{}).checked,pr:+!!(document.getElementById('ics-pr')||{}).checked};S.icsOpt=o;
- if(!o.ev&&!o.fast&&!o.pr){alert('Coche au moins une case.');return}
+act.icsx=function(){var o={ev:+!!(document.getElementById('ics-ev')||{}).checked,fast:+!!(document.getElementById('ics-fast')||{}).checked,pr:+!!(document.getElementById('ics-pr')||{}).checked,kahf:+!!(document.getElementById('ics-kahf')||{}).checked};S.icsOpt=o;
+ if(!o.ev&&!o.fast&&!o.pr&&!o.kahf){alert('Coche au moins une case.');return}
  var f=new File([icsBuild(o)],'laynoor.ics',{type:'text/calendar'});
  if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(function(){});
  else{var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download='laynoor.ics';document.body.appendChild(a);a.click();a.remove()}};
@@ -303,7 +311,7 @@ function coursesView(){var L=S.shop,h='<div class="card"><h3>Liste de courses</h
  h+='<div class="row" style="margin-top:12px"><input id="sh-n" placeholder="Article" style="flex:1"><input id="sh-q" placeholder="Qté" style="width:80px;text-align:center"><button class="btn d" data-a="addshop2" aria-label="Ajouter">+</button></div><div class="row wrap" style="margin-top:8px"><button class="btn r" data-a="clearshop">Retirer les articles cochés</button></div><p class="mut">Touche un article ou sa quantité pour les modifier (ex. « Riz » et « 500 g »).</p></div>';return h}
 act.addshop2=function(){var n=document.getElementById('sh-n'),q=document.getElementById('sh-q'),t=n&&n.value.trim();if(!t)return;S.shop.push({id:Date.now()+Math.random(),t:t,q:q?q.value.trim():'',d:0})};
 document.addEventListener('change',function(e){var t=e.target,a=t.dataset&&t.dataset.a;if(a!=='edshop'&&a!=='edqty')return;e.stopImmediatePropagation();var x=S.shop.find(function(z){return z.id==t.dataset.id});if(!x)return;
- if(a==='edqty'){x.q=t.value.trim();save();return}
+ if(a==='edqty'){x.q=t.value.trim();var pq=RQ.exec(x.q);if(pq){var cv=uni(pq[1],pq[2]);x.n=cv[0];x.u=cv[1];x.parts={manuel:x.n};x.q=fmtQ(x.n,x.u)}else{x.n=null;x.u='';x.parts=null}save();return}
  var v=t.value.trim();if(v){x.t=v;save()}else{S.shop=S.shop.filter(function(z){return z!==x});save();draw()}},true);
 document.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var id=e.target.id;if(id==='sh-n'||id==='sh-q'){act.addshop2();save();draw();var n=document.getElementById('sh-n');if(n)n.focus()}});
 
@@ -312,7 +320,7 @@ function mosqueCard(){var g=function(q){return'https://www.google.com/maps/searc
 var _pv=prayView;prayView=function(){return _pv()+mosqueCard()};
 
 /* ===== Maison : Pharmacie + stock de lait ; Enfant : Croissance, Dents, Étapes, Grossesse ===== */
-V.fam=function(){if(sub.fam!=='lait')sub.fam='pharma';return'<h2>Foyer</h2>'+tabs('fam',[['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock'):V.famBody('pharma'))};
+V.fam=function(){if(sub.fam!=='lait')sub.fam='pharma';return'<h2>Foyer</h2>'+tabs('fam',[['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock')+consCard():V.famBody('pharma'))};
 sub.enf='crois';
 var TT=[['55','Deuxième molaire supérieure droite','25–33'],['54','Première molaire supérieure droite','13–19'],['53','Canine supérieure droite','16–22'],['52','Incisive latérale supérieure droite','9–13'],['51','Incisive centrale supérieure droite','8–12'],['61','Incisive centrale supérieure gauche','8–12'],['62','Incisive latérale supérieure gauche','9–13'],['63','Canine supérieure gauche','16–22'],['64','Première molaire supérieure gauche','13–19'],['65','Deuxième molaire supérieure gauche','25–33'],['85','Deuxième molaire inférieure droite','23–31'],['84','Première molaire inférieure droite','14–18'],['83','Canine inférieure droite','17–23'],['82','Incisive latérale inférieure droite','10–16'],['81','Incisive centrale inférieure droite','6–10'],['71','Incisive centrale inférieure gauche','6–10'],['72','Incisive latérale inférieure gauche','10–16'],['73','Canine inférieure gauche','17–23'],['74','Première molaire inférieure gauche','14–18'],['75','Deuxième molaire inférieure gauche','23–31']];
 var MS=[[2,'2 mois',['Sourit en réponse à ton sourire ou à ta voix','Suit un objet ou ton visage des yeux','Lève la tête quelques secondes sur le ventre','Se calme quand on lui parle ou qu’on le prend']],
@@ -453,7 +461,7 @@ var _bv=batchView;batchView=function(){var h=_bv(),m='<div class="card"><h3>👶
 
 /* ===== Oummi (ex-Elle), Foyer/Astuces, Enfant, Apprendre : mise à jour ===== */
 pages.forEach(function(q){if(q[0]==='well')q[2]='Oummi'});
-V.well=function(){return _w().replace('<h2>Elle</h2>','<h2>Oummi</h2>')};
+V.well=function(){return _w().replace('<h2>Elle</h2>','<h2>Oummi</h2>').replace(/<div class="tabs">[\s\S]*?<\/div>/,tabs('well',[['cycle','Cycle'],['tirage','Tirage'],['preg','Grossesse']]))};
 act.kahf=function(){S.kahf=S.kahf||{};S.kahf[today]=!S.kahf[today]};
 act.srt=function(id){S.srt=S.srt||{};if(S.srt[id])delete S.srt[id];else S.srt[id]=today};
 act.nom=function(id){S.noms=S.noms||{};if(S.noms[id])delete S.noms[id];else S.noms[id]=today};
@@ -553,6 +561,60 @@ var _ap2=V.app;V.app=function(){var k=sub.app;if(k==='ghusl')k=sub.app='ablu';
  var T=tabs('app',[['rakat','Rak‘ahs'],['sunna','Sunna'],['ablu','Ablutions & ghusl'],['voyage','Voyage'],['shahada','Shahada'],['fatiha','Al-Fatiha'],['sour','Sourates'],['tash','Tashahhud'],['noms','99 noms']]),h='<h2>Apprendre</h2>'+T;
  if(k==='voyage')return h+voyageView();if(k==='sour')return h+sourView();if(k==='noms')return h+nomsView();
  var r=_ap2().replace(/<div class="tabs">[\s\S]*?<\/div>/,T);return k==='ablu'?r+ghuslCard():r};
+
+/* ===== Routine de rangement modifiable + calendrier ===== */
+var RJ=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],rtnMsg='';
+function rtnGet(){if(!S.routine)S.routine={Lundi:'Cuisine',Mardi:'Salle de bain',Mercredi:'Poussière',Jeudi:'Sols',Vendredi:'Linge de lit',Samedi:'',Dimanche:''};return S.routine}
+function routineCard(){var R=rtnGet();return'<div class="card"><h3>Ma routine de rangement</h3><p class="mut">Une petite zone par jour. Modifie chaque ligne, laisse vide pour un jour de repos.</p>'+RJ.map(function(d){return'<div class="row" style="margin:6px 0"><b style="width:84px">'+d+'</b><input data-a="rtn" data-id="'+d+'" value="'+esc(R[d]||'')+'" placeholder="Rien"></div>'}).join('')+'<div class="row wrap" style="margin-top:10px"><button class="btn d" data-a="rtncal">Ajouter au calendrier (4 semaines)</button><button class="btn r" data-a="rtnclr">Retirer du calendrier</button></div>'+(rtnMsg?'<p class="mut">'+rtnMsg+'</p>':'')+'</div>'}
+var _av=astucesView;astucesView=function(){var h=_av(),a=h.indexOf('<div class="card"><h3>Mini-routine de la semaine</h3>'),b=h.indexOf('<div class="card"><h3>Mes astuces</h3>');return a>-1&&b>a?h.slice(0,a)+routineCard()+h.slice(b):h};
+act.rtncal=function(){var R=rtnGet();S.ev=S.ev.filter(function(e){return e.src!=='rtn'});var n=0;
+ for(var i=0;i<28;i++){var d=new Date();d.setDate(d.getDate()+i);var nm=RJ[(d.getDay()+6)%7],t=(R[nm]||'').trim();if(t){S.ev.push({id:Date.now()+i+Math.random(),t:'Ménage · '+t,date:iso(d),time:'',src:'rtn'});n++}}
+ rtnMsg=n?n+' rappels ajoutés au calendrier pour les 4 prochaines semaines.':'Ajoute au moins une zone avant d’envoyer au calendrier.'};
+act.rtnclr=function(){S.ev=S.ev.filter(function(e){return e.src!=='rtn'});rtnMsg='Rappels de rangement retirés du calendrier.'};
+document.addEventListener('change',function(e){var t=e.target;if(!t.dataset||t.dataset.a!=='rtn')return;e.stopImmediatePropagation();rtnGet()[t.dataset.id]=t.value.trim();save()},true);
+act.leg=function(){S.legHide=!S.legHide};
+act.kahfd=function(id){S.kahf=S.kahf||{};S.kahf[id]=!S.kahf[id]};
+
+/* ===== Liste de courses : fusion automatique des quantités ===== */
+var UN='kg|g|l|ml|cl|c\\. à s\\.|c\\. à c\\.|gousses?|boîtes?|branches?|bouquets?|feuilles?|tranches?|morceaux?|pincées?|sachets?';
+var RI=new RegExp('^(\\d+(?:[.,]\\d+)?)\\s*(?:('+UN+')(?![a-zA-Zà-ÿ]))?\\s*(?:d[’\']\\s*|de\\s+|du\\s+|des\\s+)?(.+)$','i');
+var RQ=new RegExp('^\\s*(\\d+(?:[.,]\\d+)?)\\s*(?:('+UN+')(?![a-zA-Zà-ÿ]))?\\s*$','i');
+function uni(n,u){u=(u||'').toLowerCase();var v=parseFloat(String(n).replace(',','.'));if(u==='kg')return[v*1000,'g'];if(u==='g')return[v,'g'];if(u==='l')return[v*1000,'ml'];if(u==='cl')return[v*10,'ml'];if(u==='ml')return[v,'ml'];return[v,u.replace(/s$/,'')]}
+function fmtQ(n,u){if(n==null)return'';var r=function(x){return String(Math.round(x*100)/100).replace('.',',')};if(u==='g')return n>=1000?r(n/1000)+' kg':r(n)+' g';if(u==='ml')return n>=1000?r(n/1000)+' l':r(n)+' ml';if(!u)return r(n);var pl=n>1&&/^(gousse|boîte|branche|bouquet|feuille|tranche|morceau|pincée|sachet)$/.test(u);return r(n)+' '+u+(pl?'s':'')}
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,' ').split(/\s+/).filter(Boolean).map(function(w){return w.replace(/(s|x)$/,'')}).join(' ')}
+function parseIng(s){s=String(s).trim();var m=RI.exec(s);if(!m)return{name:s,n:null,u:''};var q=uni(m[1],m[2]);return{name:m[3].trim(),n:q[0],u:q[1]}}
+function shopAdd(ing,src,from){var k=norm(ing.name),x=S.shop.find(function(z){return norm(z.t)===k&&((ing.n==null&&z.n==null)||(ing.n!=null&&z.n!=null&&z.u===ing.u))});
+ if(!x){x={id:Date.now()+Math.random(),t:ing.name.charAt(0).toUpperCase()+ing.name.slice(1),d:0,from:from,n:ing.n,u:ing.u,q:ing.qtxt||fmtQ(ing.n,ing.u),parts:ing.n!=null?{}:null};if(ing.n!=null)x.parts[src]=ing.n;S.shop.push(x);return'new'}
+ if(ing.n==null)return'dup';x.parts=x.parts||{};if(x.parts[src]===ing.n)return'dup';var b=x.n;x.parts[src]=ing.n;x.n=Object.keys(x.parts).reduce(function(s,key){return s+x.parts[key]},0);x.q=fmtQ(x.n,x.u);if(x.n!==b)x.d=0;return'merge'}
+function shopMsg(a,m){return(a?a+' ajouté'+(a>1?'s':''):'')+(m?(a?', ':'')+m+' quantité'+(m>1?'s':'')+' fusionnée'+(m>1?'s':'')+' avec une ligne existante':'')||'Rien de nouveau à ajouter'}
+function addIngLs(d){var a=0,m=0;ingList(d).forEach(function(s){var r=shopAdd(parseIng(s),'menu:'+d,d.slice(0,3));if(r==='new')a++;else if(r==='merge')m++});return[a,m]}
+act.link=function(id){var r=addIngLs(id);toast=shopMsg(r[0],r[1])};
+act.linkall=function(){var a=0,m=0;days.forEach(function(d){var r=addIngLs(d);a+=r[0];m+=r[1]});toast=shopMsg(a,m)};
+act.recshop=function(id){var a=0,m=0;REC[+id][2].forEach(function(s){var r=shopAdd(parseIng(s),'rec:'+id,'rec');if(r==='new')a++;else if(r==='merge')m++});toast=shopMsg(a,m)};
+act.addshop2=function(){var n=document.getElementById('sh-n'),q=document.getElementById('sh-q'),t=n&&n.value.trim();if(!t)return;var qv=q?q.value.trim():'',ing,pq=qv&&RQ.exec(qv);
+ if(pq){var cv=uni(pq[1],pq[2]);ing={name:t,n:cv[0],u:cv[1]}}else if(qv)ing={name:t,n:null,u:'',qtxt:qv};else ing=parseIng(t);
+ shopAdd(ing,'man:'+Date.now(),'')};
+function coursesView(){var L=S.shop,h='<div class="card"><h3>Liste de courses</h3>'+(toast&&/ajout|fusion|Rien de nouveau/.test(toast)?'<p class="mut">'+toast+'</p>':'')+(L.map(function(x){var np=x.parts?Object.keys(x.parts).length:0,fr=np>1?'plusieurs repas ou recettes':x.from?(x.from==='rec'?'recette':x.from+'.'):'';
+  return'<div class="it" style="align-items:flex-start">'+heartBtn(x.d,'shop',x.id)+'<div style="flex:1;min-width:0"><input class="ln" data-a="edshop" data-id="'+x.id+'" value="'+esc(x.t)+'" aria-label="Article" style="width:100%">'+(fr?'<div class="mut" style="font-size:11px;margin-left:2px">pour '+esc(fr)+'</div>':'')+'</div><input data-a="edqty" data-id="'+x.id+'" value="'+esc(x.q||'')+'" placeholder="Qté" aria-label="Quantité" style="width:92px;text-align:center"><button class="x" data-a="delshop" data-id="'+x.id+'" aria-label="Retirer">×</button></div>'}).join('')||'<p class="mut">Liste vide.</p>');
+ return h+'<div class="row" style="margin-top:12px"><input id="sh-n" placeholder="Article" style="flex:1"><input id="sh-q" placeholder="Qté" style="width:92px;text-align:center"><button class="btn d" data-a="addshop2" aria-label="Ajouter">+</button></div><div class="row wrap" style="margin-top:8px"><button class="btn r" data-a="clearshop">Retirer les articles cochés</button></div><p class="mut">Les quantités des mêmes articles s’additionnent automatiquement (500 g + 250 g de riz = 750 g). Ajouter deux fois la même recette ne double pas les quantités. Touche un article ou sa quantité pour la modifier.</p></div>'}
+
+/* ===== Lait : durées de conservation selon la source ===== */
+var LP={cdc:['CDC (États-Unis)',4,4,6,'Au comptoir 4 h · réfrigéré 4 jours · congélateur 6 mois (12 mois acceptable). Décongelé : 24 h au frigo, 1 à 2 h à température ambiante. Réchauffé : 2 h. Restes de biberon : 2 h après la fin du repas. Ne jamais recongeler.'],
+ abm:['ABM / La Leche League (idéal)',4,3,6,'Comptoir 3 à 4 h · frigo 72 h · congélateur 6 mois. Décongelé : 24 h au frigo, 1 à 2 h à température ambiante. Ne jamais recongeler.'],
+ abm2:['ABM (acceptable, conditions très propres)',8,8,12,'Comptoir jusqu’à 6 à 8 h · frigo 5 à 8 jours · congélateur jusqu’à 12 mois, seulement avec un lait recueilli dans des conditions très propres. Décongelé : 24 h au frigo, 3 à 4 h à température ambiante.']};
+if(!S.lait.preset)S.lait.preset=(S.lait.am===4&&S.lait.fj===4&&S.lait.cm===6)?'cdc':'custom';
+function consCard(){var L=S.lait,pr=LP[L.preset],opts=Object.keys(LP).map(function(k){return'<option value="'+k+'" '+(L.preset===k?'selected':'')+'>'+LP[k][0]+'</option>'}).join('')+'<option value="custom" '+(!pr?'selected':'')+'>Personnalisé</option>';
+ return'<div class="card"><details><summary><b>⏱️ Durées de conservation</b></summary><p class="mut" style="margin-top:8px">Choisis la source de référence : les durées de tes poches s’adaptent.</p><select data-a="lpreset">'+opts+'</select>'
+ +(pr?'<p class="mut" style="font-size:13px;margin-top:8px">'+pr[4]+'</p>':'<p class="mut" style="font-size:13px;margin-top:8px">Durées personnalisées : règle-les ci-dessous.</p>')
+ +'<div class="row sp" style="margin:8px 0"><span>Ambiant (heures)</span><input type="number" data-a="lam" value="'+L.am+'" style="width:90px"></div><div class="row sp" style="margin:8px 0"><span>Frigo (jours)</span><input type="number" data-a="lfj" value="'+L.fj+'" style="width:90px"></div><div class="row sp" style="margin:8px 0"><span>Congélateur (mois)</span><input type="number" data-a="lcm" value="'+L.cm+'" style="width:90px"></div>'
+ +'<p class="mut" style="font-size:12px">Ces repères concernent les bébés nés à terme et en bonne santé. Pour un prématuré ou un bébé malade, demande à l’équipe médicale. Le repère de l’OMS et les repères français ne sont pas inclus : je n’ai pas pu les vérifier.</p></details></div>'}
+document.addEventListener('change',function(e){var t=e.target,a=t.dataset&&t.dataset.a;if(!a)return;
+ if(a==='lpreset'){e.stopImmediatePropagation();var L=S.lait,k=t.value;L.preset=k;if(LP[k]){L.am=LP[k][1];L.fj=LP[k][2];L.cm=LP[k][3]}save();draw();return}
+ if(a==='lam'||a==='lfj'||a==='lcm')S.lait.preset='custom'},true);
+
+/* ===== Hors connexion ===== */
+(function(){if(!('serviceWorker' in navigator))return;var reg=function(){navigator.serviceWorker.register('sw.js').catch(function(){})};document.readyState==='complete'?reg():addEventListener('load',reg)})();
+addEventListener('online',function(){draw()});addEventListener('offline',function(){draw()});
 
 draw();
 })();
