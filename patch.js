@@ -103,6 +103,13 @@ function enhance(){
   ec.forEach(function(b){var r=((S.cyc.log||{})[b.dataset.id]||{}).rap;if(r&&!b.querySelector('.rap-mk')){b.style.position='relative';b.insertAdjacentHTML('beforeend','<i class="rap-mk" style="position:absolute;bottom:0;left:50%;margin-left:-4px;font-size:7px;font-style:normal;color:var(--heart)">'+(r==='Non protégé'?'◆':'◇')+'</i>')}});
   var ecd=document.querySelector('.ecal');if(ecd&&!document.getElementById('rap-lg')){var cc2=ecd.closest('.card');if(cc2)cc2.insertAdjacentHTML('beforeend','<div class="mut" id="rap-lg" style="font-size:11px;margin-top:6px">◆ rapport non protégé · ◇ rapport protégé</div>')}}
  if(page==='stat'){var sp=document.getElementById('st-ph');if(sp)tx('readonly',function(s){return s.count()}).then(function(n){var e=document.getElementById('st-ph');if(e)e.textContent=n}).catch(function(){})}
+ if(page==='home'&&!document.getElementById('sr-btn')){var hr2=A.querySelector('.hero');if(hr2)hr2.insertAdjacentHTML('afterend','<button id="sr-btn" class="btn" data-a="go" data-id="search" style="width:100%;margin:10px 0;text-align:left">🔍 Rechercher dans LAYNOOR…</button>')}
+ if(page==='search'){var qi=document.getElementById('q-in');if(qi&&!qi.dataset.f){qi.dataset.f=1;try{qi.focus()}catch(e){}}}
+ if(page==='home'){var cl=A.querySelector('.cal'),cc3=cl&&cl.closest('.card');
+  if(cc3&&!cc3.dataset.wk){cc3.dataset.wk=1;Array.prototype.slice.call(cc3.querySelectorAll('.it')).forEach(function(r){r.remove()});
+   Array.prototype.slice.call(cc3.querySelectorAll('p.mut')).forEach(function(q){if(q.textContent.indexOf('Rien de prévu')>-1)q.remove()});
+   var wend=addD(mondayKey(),6),wev=(S.ev||[]).filter(function(e){return e.date>=today&&e.date<=wend}).sort(function(a,b){return(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))}).slice(0,6);
+   cl.insertAdjacentHTML('afterend',wev.length?wev.map(function(e){return'<div class="it"><span class="t" style="margin:0">'+(e.date===today?(e.time||'—'):new Date(e.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric'}))+'</span><span>'+esc(e.t)+'</span></div>'}).join(''):'<p class="mut">Rien de prévu cette semaine.</p>')}}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -538,10 +545,10 @@ V.enf=function(){if(['crois','dents','etapes','ecran'].indexOf(sub.enf)<0)sub.en
 sub.enf='crois';
 
 /* --- Apprendre : voyage, sourates, 99 noms, ghusl avec ablutions --- */
-function voyageView(){return'<div class="card"><h3>La prière du voyageur</h3><p class="mut">Pendant un voyage, Allah a allégé la prière : on peut la raccourcir (qasr) et, si besoin, regrouper deux prières (jam‘). Base : Coran 4:101 et la pratique du Prophète ﷺ en voyage (Bukhari et Muslim).</p>'
+function voyageView(){return'<div class="card"><h3>La prière du voyageur</h3><p class="mut">Pendant un voyage, Allah a allégé la prière : on peut la raccourcir (qasr) et, selon la plupart des écoles, regrouper deux prières (jam‘). Base : Coran 4:101 et la pratique du Prophète ﷺ en voyage (Bukhari et Muslim).</p>'
  +'<h3 style="margin-top:12px">Le raccourcissement (qasr)</h3>'+[['Fajr','2 rak‘ahs (inchangé)'],['Dohr','4 → 2 rak‘ahs'],['Asr','4 → 2 rak‘ahs'],['Maghrib','3 rak‘ahs (inchangé)'],['Isha','4 → 2 rak‘ahs']].map(function(r){return'<div class="it"><b style="width:76px">'+r[0]+'</b><span>'+r[1]+'</span></div>'}).join('')+'</div>'
- +'<div class="card"><h3>Le regroupement (jam‘)</h3>'+ol(['Dohr avec Asr, à l’heure de l’un ou de l’autre.','Maghrib avec Isha, à l’heure de l’un ou de l’autre.','Le Fajr ne se regroupe avec aucune autre prière.','Pas obligatoire : on peut aussi prier chaque prière à son heure, raccourcie.'])+'</div>'
- +'<div class="card"><h3>À savoir</h3>'+ol(['Le raccourcissement commence en quittant les limites de sa ville.','La distance qui permet le qasr varie selon les écoles : beaucoup retiennent environ 80 à 90 km, certains un peu moins.','La durée de séjour au-delà de laquelle on reprend la prière complète diffère aussi selon les écoles.','La prière du vendredi n’est pas due en voyage.'])+'<p class="mut">Pour ton cas précis (distance, durée, avion ou train), demande à une personne de science de confiance.</p></div>'
+ +'<div class="card"><h3>Le regroupement (jam‘)</h3>'+ol(['Dohr avec Asr, à l’heure de l’un ou de l’autre.','Maghrib avec Isha, à l’heure de l’un ou de l’autre.','Le Fajr ne se regroupe avec aucune autre prière.','Pas obligatoire : on peut aussi prier chaque prière à son heure, raccourcie.','Les hanafites ne permettent le regroupement en voyage qu’à Arafat et Muzdalifa (pendant le pèlerinage) ; les trois autres écoles le permettent en voyage.'])+'</div>'
+ +'<div class="card"><h3>À savoir</h3>'+ol(['Le raccourcissement commence en quittant les limites de sa ville.','<b>Distance :</b> la majorité (malikites, chaféites, hanbalites) retient environ 80 km. Les hanafites parlent de trois jours de route, et d’autres savants se réfèrent à l’usage : ce que les gens appellent un « voyage ». Les estimations en kilomètres varient.','<b>Durée du séjour sur place :</b> malikites, chaféites et hanbalites : si tu comptes rester plus de 4 jours, tu pries en entier ; 4 jours ou moins, tu peux raccourcir (selon certains avis, les jours d’arrivée et de départ ne sont pas comptés). Hanafites : à partir de 15 jours de séjour prévu, on prie en entier ; en dessous, on raccourcit.','<b>Si tu ne sais pas combien de temps tu resteras</b> (une démarche ou une affaire à régler) et que tu n’as pas décidé de t’installer, tu peux continuer à raccourcir, même si cela dure plusieurs semaines (avis d’Ibn Qudama dans al-Mughni, repris par la Commission permanente saoudienne).','Raccourcir est fortement recommandé selon la majorité, et obligatoire chez les hanafites.','La prière du vendredi n’est pas due en voyage.'])+'<p class="mut">Sources consultées : IslamQA (réponses 44555, 82658 et 222814). Pour ton cas précis (distance, durée, avion ou train), demande à une personne de science de confiance.</p></div>'
  +'<div class="card"><h3>Invocation du voyage</h3>'+bl('','سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنْقَلِبُونَ','Subhâna l-ladhî sakhkhara lanâ hâdhâ wa mâ kunnâ lahû muqrinîn, wa innâ ilâ Rabbinâ la-munqalibûn','Gloire à Celui qui nous a soumis cela, alors que nous n’étions pas capables de le dominer. C’est vers notre Seigneur que nous retournerons. (Coran 43:13-14 ; Muslim 1342)')+'</div>'}
 var SR=[['ikhlas','Al-Ikhlas',112,[['قُلْ هُوَ ٱللَّهُ أَحَدٌ','Qul huwa Llâhu ahad','Dis : « Il est Allah, Unique. »'],['ٱللَّهُ ٱلصَّمَدُ','Allâhu s-samad','Allah, le Seul vers qui l’on se tourne en toute chose.'],['لَمْ يَلِدْ وَلَمْ يُولَدْ','Lam yalid wa lam yûlad','Il n’a pas engendré et n’a pas été engendré.'],['وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ','Wa lam yakun lahû kufuwan ahad','Et nul n’est égal à Lui.']]],
 ['falaq','Al-Falaq',113,[['قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ','Qul a‘ûdhu bi-Rabbi l-falaq','Dis : « Je cherche protection auprès du Seigneur de l’aube naissante,'],['مِن شَرِّ مَا خَلَقَ','Min sharri mâ khalaq','contre le mal de ce qu’Il a créé,'],['وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ','Wa min sharri ghâsiqin idhâ waqab','contre le mal de l’obscurité quand elle s’étend,'],['وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ','Wa min sharri n-naffâthâti fi l-‘uqad','contre le mal de celles qui soufflent sur les nœuds,'],['وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ','Wa min sharri hâsidin idhâ hasad','et contre le mal de l’envieux quand il envie. »']]],
@@ -689,6 +696,69 @@ function statView(){menuLogSync();var h='',f0=prFirst(),win=f0?Math.min(30,difD(
  h+=sec('✨ Et aussi',srow('Photos dans Souvenirs','<span id="st-ph">…</span>')+(milk>0?srow('Lait maternel tiré depuis le début',milk+' ml'):'')+srow('Tâches terminées (matrice)',tk.filter(function(t){return t.d}).length+' / '+tk.length)+srow('Événements au calendrier',(S.ev||[]).filter(function(e){return!e.src}).length));
  return h}
 V.stat=function(){return'<h2>Bilan</h2><p class="mut">Un regard sur tes habitudes, calculé sur cet appareil. Les données de santé et de cycle n’y sont pas incluses.</p>'+statView()};
+
+/* ===== Recherche ===== */
+pages.splice(pages.findIndex(function(q){return q[0]==='set'}),0,['search','🔍','Recherche']);
+var SQ='',SRCH=[];
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’'‘`]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+var SX=[['Météo','home',null,'Accueil','meteo temperature temps pluie soleil'],['Hydratation, humeur et gratitude','home',null,'Accueil','eau verres boire humeur gratitude'],['Prochaine prière (compteur)','home',null,'Accueil','compteur fajr prochaine priere'],
+['Calendrier','org','agenda','Organisation › Calendrier','calendrier agenda rendez-vous evenement legende couleurs export apple ics jeune vendredi jumua'],
+['Matrice Eisenhower (to-do)','org','matrice','Organisation › Matrice','taches todo to-do priorites urgent important deleguer eisenhower'],
+['Astuces ménage et rangement','fam','astuces','Foyer › Astuces','astuces menage rangement nettoyage anti poussiere vinaigre bicarbonate adoucissant vitres calcaire micro-ondes routine securite produits'],
+['Dates importantes et anniversaires','fam','dates','Foyer › Dates','anniversaire dates importantes mariage rappel fete naissance'],
+['Pharmacie','fam','pharma','Foyer › Pharmacie','pharmacie medicament peremption doliprane paracetamol collyre sirop creme ouverture armoire'],
+['Stock de lait maternel','fam','lait','Foyer › Stock de lait','lait maternel stock poches goutte congelateur frigo conservation durees cdc abm la leche league decongele biberon'],
+['Menus de la semaine','cuis','menu','Cuisine › Menus','menus semaine repas planning ingredients diner'],
+['Batch cooking et recettes','cuis','rec','Cuisine › Batch & recettes','batch cooking recettes vegetal vegetarien vegan dme finger food congeler diversification menee par enfant securite'],
+['Liste de courses','cuis','courses','Cuisine › Courses','courses liste quantites fusion supermarche'],
+['Recettes du placard','cuis','placard','Cuisine › Placard','placard frigo restes idees recette ingredients disponibles'],
+['Croissance (courbes OMS)','enf','crois','Enfant › Croissance','croissance poids taille perimetre cranien courbe oms percentile mesures bebe'],
+['Dents de lait','enf','dents','Enfant › Dents','dents dentition poussee dentaire incisive canine molaire'],
+['Étapes de développement','enf','etapes','Enfant › Étapes','etapes developpement premiers pas premiers mots motricite sourire assis marche'],
+['Écrans et enfants','enf','ecran','Enfant › Écran','ecran ecrans tele tablette dessins animes bluey mouk lucas araignee village de dany regle 4 pas'],
+['Dhikr (compteur)','islam','dhikr','Islam › Dhikr','dhikr compteur tasbih subhanallah alhamdulillah allahu akbar istighfar'],
+['Horaires de prière, Qibla et mosquées','islam','prieres','Islam › Prières & Qibla','horaires priere fajr dohr dhuhr asr maghrib isha qibla boussole mosquee mawaqit lever du soleil'],
+['Dua (invocations)','islam','dua','Islam › Dua','dua invocation invocations du a reveil dormir manger voyage pardon parents'],
+['Rappel du jour','islam','rappels','Islam › Rappels','rappel du jour hadith rappels verset'],
+['Jeûne (Ramadan, jours blancs)','islam','jeune','Islam › Jeûne','jeune ramadan jours blancs ayyam al bid rattraper lundi jeudi sunna'],
+['Défis Coran','islam','coran','Islam › Coran','coran defis khatm pages lecture mushaf al kahf'],
+['Rak‘ahs et prière pas à pas','app','rakat','Apprendre › Rak‘ahs','rakat rakah rakaat nombre priere etapes takbir ruku sujud salam'],
+['Prières surérogatoires (sunna)','app','sunna','Apprendre › Sunna','sunna surerogatoire rawatib witr duha tahajjud qiyam istikhara tahiyyat al masjid salut mosquee facultatives'],
+['Ablutions et ghusl','app','ablu','Apprendre › Ablutions & ghusl','ablutions wudu ghusl purification grandes ablutions petites'],
+['Prière du voyageur','app','voyage','Apprendre › Voyage','voyage voyageur qasr raccourcir jam regrouper distance avion train priere en voyage'],
+['Shahada','app','shahada','Apprendre › Shahada','shahada chahada temoignage de foi conversion'],
+['Sourate Al-Fatiha','app','fatiha','Apprendre › Al-Fatiha','fatiha al fatiha ouverture'],
+['Sourates courtes','app','sour','Apprendre › Sourates','sourates courtes apprendre memoriser'],
+['Tashahhud','app','tash','Apprendre › Tashahhud','tashahhud tachaoud attahiyyat salat ala nabi ibrahimiyya'],
+['99 noms d’Allah','app','noms','Apprendre › 99 noms','99 noms asma ul husna noms de allah'],
+['Suivi du cycle','well','cycle','Oummi › Cycle','cycle regles ovulation fertile symptomes temperature glaire symptothermie rapports humeur'],
+['Tirage (lait)','well','tirage','Oummi › Tirage','tirage tire lait plan objectif stock seances absence reprise travail'],
+['Suivi de grossesse','well','preg','Oummi › Grossesse','grossesse terme date des dernieres regles echographie semaines amenorrhee sa'],
+['Souvenirs (photos)','souv',null,'Souvenirs','souvenirs photos premiers pas dessins legende'],
+['Assistante IA','ia',null,'IA','ia assistante chat'],
+['Bilan et statistiques','stat',null,'Bilan','bilan statistiques moyenne prieres dhikr plats ingredients'],
+['Profils de la famille','set',null,'Réglages › Profils','profils famille enfant naissance prenom'],
+['Sauvegarde et restauration','set',null,'Réglages › Sauvegarde','sauvegarde export import restaurer photos donnees'],
+['Hors connexion','set',null,'Réglages','hors connexion offline internet'],
+['Thème clair ou sombre','set',null,'Réglages','theme sombre clair mode prenom']];
+function sIndex(){var L=SX.map(function(e){return{t:e[0],p:e[1],s:e[2],d:e[3],k:nz(e[0]+' '+e[4]),b:2}});
+ BR.forEach(function(r){L.push({t:r[0],p:'cuis',s:'rec',d:'Cuisine › Batch & recettes',k:nz(r[0]+' '+r[2].join(' ')),b:0})});
+ DU.forEach(function(d){L.push({t:'Dua · '+d[0],p:'islam',s:'dua',d:'Islam › Dua',k:nz(d[0]+' '+d[2]+' '+d[3]),b:0})});
+ NM.forEach(function(n,i){L.push({t:'99 noms · '+n[1],p:'app',s:'noms',d:'Apprendre › 99 noms',k:nz(n[1]+' '+n[2]),b:0})});
+ SR.forEach(function(s){L.push({t:'Sourate '+s[1],p:'app',s:'sour',x:{sr:s[0]},d:'Apprendre › Sourates',k:nz('sourate '+s[1]+' '+s[2]),b:1})});
+ TT.forEach(function(t){L.push({t:t[1],p:'enf',s:'dents',d:'Enfant › Dents',k:nz(t[1]+' dent'),b:0})});
+ MS.forEach(function(g){g[2].forEach(function(t){L.push({t:t,p:'enf',s:'etapes',d:'Enfant › Étapes · '+g[1],k:nz(t+' '+g[1]),b:0})})});
+ return L}
+function srchHtml(){var q=nz(SQ),h='';
+ if(!q){SRCH=[];return'<p class="mut">Tape un mot et touche un résultat pour aller directement au bon endroit.</p><div class="row wrap">'+['voyageur','dhikr','lait','ablutions','courses','dents','cycle','ikhlas','riz','anniversaire'].map(function(w){return'<button class="btn" data-a="sq" data-id="'+w+'">'+w+'</button>'}).join('')+'</div>'}
+ var T=q.split(' '),R=[];sIndex().forEach(function(e){var ok=T.every(function(w){return e.k.indexOf(w)>-1});if(!ok)return;var tz=nz(e.t),sc=e.b;T.forEach(function(w){sc+=tz.indexOf(w)>-1?3:1});R.push({e:e,sc:sc})});
+ R.sort(function(a,b){return b.sc-a.sc||a.e.t.localeCompare(b.e.t)});SRCH=R.slice(0,15).map(function(r){return r.e});
+ if(!SRCH.length)return'<p class="mut">Aucun résultat pour « '+esc(SQ)+' ». Essaie un mot plus court ou un autre mot (par exemple « voyage » au lieu de « voyageuse »).</p>';
+ return SRCH.map(function(e,i){return'<button class="card" data-a="gosearch" data-id="'+i+'" style="display:block;width:100%;text-align:left;margin:8px 0"><b>'+esc(e.t)+'</b><div class="mut" style="font-size:12px">'+esc(e.d)+' ›</div></button>'}).join('')+(R.length>15?'<p class="mut" style="font-size:12px">'+(R.length-15)+' autres résultats : précise ta recherche.</p>':'')}
+V.search=function(){return'<h2>Recherche</h2><input id="q-in" placeholder="Un mot : voyageur, dhikr, lait, riz…" value="'+esc(SQ)+'" autocomplete="off" autocapitalize="none"><div id="q-res" style="margin-top:10px">'+srchHtml()+'</div>'};
+document.addEventListener('input',function(e){if(e.target.id!=='q-in')return;SQ=e.target.value;var r=document.getElementById('q-res');if(r)r.innerHTML=srchHtml()});
+act.sq=function(id){SQ=id};
+act.gosearch=function(id){var r=SRCH[+id];if(!r)return;page=r.p;if(r.s)sub[r.p]=r.s;if(r.x)Object.keys(r.x).forEach(function(k){sub[k]=r.x[k]});menuOpen=false;toast='';scrollTo(0,0)};
 
 draw();
 })();
