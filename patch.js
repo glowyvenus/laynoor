@@ -99,6 +99,9 @@ function enhance(){
  if(page==='home'&&navigator.onLine===false&&!document.getElementById('off-warn'))A.insertAdjacentHTML('afterbegin','<div class="card" id="off-warn" style="background:var(--sage)"><div class="mut">📴 Hors connexion : tout fonctionne, sauf la météo et les liens externes.</div></div>');
  if(page==='set'&&!document.getElementById('off-card')){A.insertAdjacentHTML('beforeend','<div class="card" id="off-card"><h3>Hors connexion</h3><p class="mut" id="off-msg">Vérification…</p></div>');
   var om=document.getElementById('off-msg');(window.caches?caches.has('laynoor-v1'):Promise.resolve(false)).then(function(ok){if(!om)return;om.textContent=ok&&navigator.serviceWorker&&navigator.serviceWorker.controller?'✅ Prêt : l’app s’ouvre sans internet. Il te faut internet seulement pour la météo, les liens (Mawaqit, Quran.com, Google Maps) et les mises à jour.':'⏳ Pas encore prêt : ouvre l’app une fois avec internet, puis ferme-la et rouvre-la.'}).catch(function(){})}
+ if(page==='well'&&(sub.well||'cycle')==='cycle'){var ec=document.querySelectorAll('.ecal button[data-a="csel"]');
+  ec.forEach(function(b){var r=((S.cyc.log||{})[b.dataset.id]||{}).rap;if(r&&!b.querySelector('.rap-mk')){b.style.position='relative';b.insertAdjacentHTML('beforeend','<i class="rap-mk" style="position:absolute;bottom:0;left:50%;margin-left:-4px;font-size:7px;font-style:normal;color:var(--heart)">'+(r==='Non protégé'?'◆':'◇')+'</i>')}});
+  var ecd=document.querySelector('.ecal');if(ecd&&!document.getElementById('rap-lg')){var cc2=ecd.closest('.card');if(cc2)cc2.insertAdjacentHTML('beforeend','<div class="mut" id="rap-lg" style="font-size:11px;margin-top:6px">◆ rapport non protégé · ◇ rapport protégé</div>')}}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -615,6 +618,27 @@ document.addEventListener('change',function(e){var t=e.target,a=t.dataset&&t.dat
 /* ===== Hors connexion ===== */
 (function(){if(!('serviceWorker' in navigator))return;var reg=function(){navigator.serviceWorker.register('sw.js').catch(function(){})};document.readyState==='complete'?reg():addEventListener('load',reg)})();
 addEventListener('online',function(){draw()});addEventListener('offline',function(){draw()});
+
+/* ===== Cycle : rapports ===== */
+var _cv=cycleView;cycleView=function(){var h=_cv(),t=lgd(csel),m='<div class="card"><h3>Symptômes</h3>',c='<div class="card"><h3>Rapports</h3><div class="row wrap">'+chp('rap','Non protégé',t.rap==='Non protégé')+chp('rap','Protégé',t.rap==='Protégé')+'</div><p class="mut" style="font-size:12px">Repère personnel pour suivre ta fenêtre fertile. Ce suivi ne remplace ni une contraception ni un avis médical.</p></div>';return h.indexOf(m)>-1?h.replace(m,c+m):h+c};
+
+/* ===== Dates importantes (anniversaires…) ===== */
+var DTY={anniv:['🎂','Anniversaire'],mariage:['💍','Anniversaire de mariage'],autre:['📌','Autre date']};
+function dtList(){var L=(S.dates||[]),F=(S.fam||[]).filter(function(f){return f.b}).map(function(f){var q=f.b.split('-');return{id:'fam'+f.id,t:f.n,type:'anniv',y:+q[0],m:+q[1],d:+q[2],fam:1}});return L.concat(F)}
+function dtEvt(x,Y){var m=x.m,d=x.d;if(m===2&&d===29&&!(Y%4===0&&(Y%100!==0||Y%400===0)))d=28;var age=x.y?Y-x.y:null,ds=Y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'),t=x.type==='anniv'?'🎂 Anniversaire de '+x.t+(age>0?' · '+age+(age>1?' ans':' an'):''):x.type==='mariage'?'💍 '+x.t+(age>0?' · '+age+' ans':''):'📌 '+x.t;return{id:'dt-'+x.id+'-'+Y,t:t,date:ds,time:'',src:'dt'}}
+function syncDates(){S.ev=(S.ev||[]).filter(function(e){return e.src!=='dt'});var y0=new Date().getFullYear();dtList().forEach(function(x){for(var Y=y0;Y<=y0+2;Y++){if(x.y&&Y<x.y)continue;S.ev.push(dtEvt(x,Y))}})}
+function dtNext(x){var y=new Date().getFullYear(),e=dtEvt(x,y);if(e.date<today)e=dtEvt(x,y+1);return e.date}
+function datesView(){var L=dtList().map(function(x){return{x:x,n:dtNext(x)}}).sort(function(a,b){return a.n.localeCompare(b.n)});
+ return'<div class="card"><h3>Dates importantes</h3><p class="mut">Anniversaires et autres dates à ne pas oublier. Elles reviennent chaque année et apparaissent dans le calendrier. Les anniversaires des profils (Réglages › Profils) sont ajoutés automatiquement.</p>'
+ +(L.map(function(o){var x=o.x,dl2=difD(o.n,today),ty=DTY[x.type]||DTY.autre,age=x.y?new Date(o.n+'T12:00').getFullYear()-x.y:0;
+  return'<div class="it"><span style="flex:none;font-size:22px">'+ty[0]+'</span><span>'+esc(x.t)+'<div class="mut">'+fd(o.n)+(x.type==='anniv'&&age>0?' · aura '+age+(age>1?' ans':' an'):'')+' · '+(dl2===0?'aujourd’hui':'dans '+dl2+' j')+(x.fam?' · profil':'')+'</div></span>'+(x.fam?'':'<button class="x" data-a="dtdel" data-id="'+x.id+'" aria-label="Supprimer">×</button>')+'</div>'}).join('')||'<p class="mut">Aucune date pour l’instant.</p>')+'</div>'
+ +'<div class="card"><h3>Ajouter une date</h3><select id="dt-t">'+Object.keys(DTY).map(function(k){return'<option value="'+k+'">'+DTY[k][0]+' '+DTY[k][1]+'</option>'}).join('')+'</select><input id="dt-n" placeholder="Nom ou description" style="margin-top:8px"><div class="row" style="margin-top:8px"><input id="dt-d" type="date" style="flex:1"><label style="display:flex;gap:6px;align-items:center;white-space:nowrap"><input type="checkbox" id="dt-ny" style="width:auto"> année inconnue</label></div><p><button class="btn d" data-a="dtadd">Ajouter au calendrier</button></p></div>'}
+act.dtadd=function(){var g=function(i){var e=document.getElementById(i);return e?e:{}},n=g('dt-n').value&&g('dt-n').value.trim(),d=g('dt-d').value;if(!n||!d){alert('Indique un nom et une date.');return}
+ var q=d.split('-');S.dates=S.dates||[];S.dates.push({id:Date.now(),t:n,type:g('dt-t').value||'autre',y:g('dt-ny').checked?null:+q[0],m:+q[1],d:+q[2]});syncDates()};
+act.dtdel=function(id){S.dates=(S.dates||[]).filter(function(x){return x.id!=id});syncDates()};
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='dt-n'){act.dtadd();save();draw()}});
+var _og=V.org;V.org=function(){syncDates();var T=tabs('org',[['agenda','Calendrier'],['matrice','Matrice Eisenhower'],['dates','Dates']]);if(sub.org==='dates')return'<h2>Organisation</h2>'+T+datesView();return _og().replace(/<div class="tabs">[\s\S]*?<\/div>/,T)};
+syncDates();
 
 draw();
 })();
