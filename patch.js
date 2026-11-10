@@ -102,6 +102,7 @@ function enhance(){
  if(page==='well'&&(sub.well||'cycle')==='cycle'){var ec=document.querySelectorAll('.ecal button[data-a="csel"]');
   ec.forEach(function(b){var r=((S.cyc.log||{})[b.dataset.id]||{}).rap;if(r&&!b.querySelector('.rap-mk')){b.style.position='relative';b.insertAdjacentHTML('beforeend','<i class="rap-mk" style="position:absolute;bottom:0;left:50%;margin-left:-4px;font-size:7px;font-style:normal;color:var(--heart)">'+(r==='Non protégé'?'◆':'◇')+'</i>')}});
   var ecd=document.querySelector('.ecal');if(ecd&&!document.getElementById('rap-lg')){var cc2=ecd.closest('.card');if(cc2)cc2.insertAdjacentHTML('beforeend','<div class="mut" id="rap-lg" style="font-size:11px;margin-top:6px">◆ rapport non protégé · ◇ rapport protégé</div>')}}
+ if(page==='stat'){var sp=document.getElementById('st-ph');if(sp)tx('readonly',function(s){return s.count()}).then(function(n){var e=document.getElementById('st-ph');if(e)e.textContent=n}).catch(function(){})}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -491,8 +492,8 @@ function astucesView(){var T=[
  +'<div class="card"><h3>Mini-routine de la semaine</h3><p class="mut">Une idée souple, à adapter : une petite zone par jour.</p>'+W.map(function(w){return'<div class="it"><b style="width:84px">'+w[0]+'</b><span>'+w[1]+'</span></div>'}).join('')+'</div>'
  +'<div class="card"><h3>Mes astuces</h3>'+(my.map(function(x){return'<div class="it"><span>'+esc(x.t)+'</span><button class="x" data-a="tipdel" data-id="'+x.id+'" aria-label="Supprimer">×</button></div>'}).join('')||'<p class="mut">Ajoute tes propres astuces ici.</p>')+'<div class="row" style="margin-top:10px"><input id="tip-n" placeholder="Une astuce à garder…"><button class="btn d" data-a="tipadd" aria-label="Ajouter">+</button></div></div>'
  +'<div class="card" style="background:var(--rose)"><h3>Sécurité</h3>'+ol(['Ne mélange jamais la javel avec du vinaigre, de l’ammoniaque ou un produit acide : cela dégage un gaz toxique.','Aère la pièce quand tu nettoies et mets des gants.','Range tous les produits hors de portée des enfants, dans leur flacon d’origine, jamais dans une bouteille d’eau.','En cas d’ingestion ou d’inhalation, appelle le 15 ou ton centre antipoison.'])+'</div>'}
-V.fam=function(){if(['astuces','pharma','lait'].indexOf(sub.fam)<0)sub.fam='astuces';
- return'<h2>Foyer</h2>'+tabs('fam',[['astuces','Astuces'],['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock'):sub.fam==='pharma'?V.famBody('pharma'):astucesView())};
+V.fam=function(){if(['astuces','dates','pharma','lait'].indexOf(sub.fam)<0)sub.fam='astuces';
+ return'<h2>Foyer</h2>'+tabs('fam',[['astuces','Astuces'],['dates','Dates'],['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock'):sub.fam==='pharma'?V.famBody('pharma'):sub.fam==='dates'?datesView():astucesView())};
 sub.fam='astuces';
 
 /* --- Goutte de lait interactive --- */
@@ -637,8 +638,57 @@ act.dtadd=function(){var g=function(i){var e=document.getElementById(i);return e
  var q=d.split('-');S.dates=S.dates||[];S.dates.push({id:Date.now(),t:n,type:g('dt-t').value||'autre',y:g('dt-ny').checked?null:+q[0],m:+q[1],d:+q[2]});syncDates()};
 act.dtdel=function(id){S.dates=(S.dates||[]).filter(function(x){return x.id!=id});syncDates()};
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='dt-n'){act.dtadd();save();draw()}});
-var _og=V.org;V.org=function(){syncDates();var T=tabs('org',[['agenda','Calendrier'],['matrice','Matrice Eisenhower'],['dates','Dates']]);if(sub.org==='dates')return'<h2>Organisation</h2>'+T+datesView();return _og().replace(/<div class="tabs">[\s\S]*?<\/div>/,T)};
+var _og=V.org;V.org=function(){syncDates();var T=tabs('org',[['agenda','Calendrier'],['matrice','Matrice Eisenhower']]);if(sub.org==='dates')sub.org='agenda';return _og().replace(/<div class="tabs">[\s\S]*?<\/div>/,T)};
 syncDates();
+
+/* ===== Bilan (statistiques) ===== */
+pages.splice(pages.findIndex(function(q){return q[0]==='set'}),0,['stat','📊','Bilan']);
+var stMsg='';
+function f1(x){return String(Math.round(x*10)/10).replace('.',',')}
+function sBar(v){return'<div style="height:8px;background:var(--line);border-radius:8px;margin:4px 0 8px"><div style="height:8px;width:'+Math.max(0,Math.min(100,v))+'%;background:var(--sage2);border-radius:8px"></div></div>'}
+function srow(a,b){return'<div class="row sp" style="margin:6px 0"><span>'+a+'</span><b>'+b+'</b></div>'}
+function sec(t,b){return'<div class="card"><h3>'+t+'</h3>'+b+'</div>'}
+function dayList(n){var a=[];for(var i=n-1;i>=0;i--)a.push(addD(today,-i));return a}
+function prCount(d){var o=S.pr[d]||{};return P.filter(function(q){return o[q]}).length}
+function prFirst(){var k=Object.keys(S.pr||{}).filter(function(d){return prCount(d)>0}).sort();return k[0]||null}
+function ingBump(name){var k=norm(name);if(!k)return;S.ingStat=S.ingStat||{};var o=S.ingStat[k]=S.ingStat[k]||{n:name,c:0};o.c++}
+var _sa=shopAdd;shopAdd=function(i,s,f){var r=_sa(i,s,f);if(r!=='dup')ingBump(i.name);return r};
+var _rs2=act.recshop;act.recshop=function(id){_rs2(id);S.recLog=S.recLog||{};S.recLog[id]=(S.recLog[id]||0)+1};
+(function(){if(S.ingStat)return;S.ingStat={};Object.keys(S.ingL||{}).forEach(function(d){(S.ingL[d]||[]).forEach(function(s){ingBump(parseIng(s).name)})});(S.shop||[]).forEach(function(x){ingBump(x.t)})})();
+function mondayKey(){var x=new Date(today+'T12:00'),w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);return iso(x)}
+function menuLogSet(k,t){S.menuLog=(S.menuLog||[]).filter(function(x){return x.k!==k});if(t)S.menuLog.push({k:k,t:t})}
+function menuLogSync(){S.menuLog=S.menuLog||[];var wk=mondayKey();if(S.menuLogWk!==wk){S.menuLogWk=wk;days.forEach(function(d){var t=(S.menu[d]||'').trim();if(t)menuLogSet(wk+'|'+d,t)})}}
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.a==='menu'){menuLogSet(mondayKey()+'|'+t.dataset.id,t.value.trim());S.menuLogWk=mondayKey()}},true);
+menuLogSync();
+act.stadd=function(id){var o=(S.ingStat||{})[id];if(!o)return;var r=shopAdd({name:o.n,n:null,u:''},'stat','');stMsg=r==='new'?'« '+o.n+' » ajouté à la liste de courses.':'« '+o.n+' » est déjà dans la liste de courses.'};
+function statView(){menuLogSync();var h='',f0=prFirst(),win=f0?Math.min(30,difD(today,f0)+1):0;
+ if(!win)h+=sec('🕌 Prières','<p class="mut">Coche tes prières sur l’accueil : les statistiques apparaîtront ici.</p>');
+ else{var ds=dayList(win),tot=0,per={};P.forEach(function(q){per[q]=0});ds.forEach(function(d){var o=S.pr[d]||{};P.forEach(function(q){if(o[q]){tot++;per[q]++}})});
+  var d7=dayList(Math.min(7,win)),t7=0;d7.forEach(function(d){t7+=prCount(d)});
+  var run=0,best=0,x=f0;while(x<=today){run=prCount(x)===5?run+1:0;if(run>best)best=run;x=addD(x,1)}
+  var cur=0,s0=prCount(today)===5?today:addD(today,-1);while(s0>=f0&&prCount(s0)===5){cur++;s0=addD(s0,-1)}
+  var arr=P.map(function(q){return[q,per[q]/win*100]}).sort(function(a,b){return b[1]-a[1]});
+  h+=sec('🕌 Prières',srow('Moyenne (7 derniers jours)',f1(t7/d7.length)+' / 5')+srow('Moyenne ('+win+' dernier'+(win>1?'s jours':' jour')+')',f1(tot/win)+' / 5')+srow('Série de jours complets',cur+' j (record '+best+' j)')+'<div style="margin-top:10px">'+P.map(function(q){var v=per[q]/win*100;return'<div class="row sp"><span>'+PF[q]+'</span><span class="mut">'+Math.round(v)+' %</span></div>'+sBar(v)}).join('')+'</div><p class="mut" style="font-size:12px">La plus régulière : '+PF[arr[0][0]]+' · à renforcer : '+PF[arr[arr.length-1][0]]+'.</p>')}
+ var dt=(S.dk&&S.dk.tot)||{},dk=Object.keys(dt).filter(function(d){return dt[d]>0}),sum=0,bD=0,bDt='';dk.forEach(function(d){sum+=dt[d];if(dt[d]>bD){bD=dt[d];bDt=d}});
+ var l7=dayList(7),mx=Math.max.apply(null,l7.map(function(d){return dt[d]||0}).concat([1]));
+ h+=sec('📿 Dhikr',dk.length?srow('Total',sum)+srow('Moyenne par jour de dhikr',f1(sum/dk.length))+srow('Meilleur jour',bD+' ('+fd(bDt)+')')+'<div style="display:flex;gap:6px;align-items:flex-end;height:74px;margin-top:10px">'+l7.map(function(d){var v=dt[d]||0;return'<div style="flex:1;text-align:center"><div style="height:'+Math.round(v/mx*50)+'px;background:var(--sage2);border-radius:6px 6px 0 0"></div><div class="mut" style="font-size:10px">'+'LMMJVSD'[(new Date(d+'T12:00').getDay()+6)%7]+'</div></div>'}).join('')+'</div><p class="mut" style="font-size:12px">Les 7 derniers jours.</p>':'<p class="mut">Utilise le compteur de dhikr : les statistiques apparaîtront ici.</p>');
+ var pgT=0,pgD={};((S.qr&&S.qr.ch)||[]).forEach(function(c){var g=qpg(c);Object.keys(g).forEach(function(d){pgT+=g[d];pgD[d]=1})});
+ var nS=SR.filter(function(s){return(S.srt||{})[s[0]]}).length,nN=Object.keys(S.noms||{}).length,kh=Object.keys(S.kahf||{}).filter(function(d){return S.kahf[d]}).length,fdn=Object.keys((S.fast&&S.fast.done)||{}).filter(function(d){return S.fast.done[d]}).length,ow=Object.keys((S.fast&&S.fast.owed)||{}).filter(function(d){return S.fast.owed[d]==1}).length+((S.fast&&S.fast.n)||0);
+ h+=sec('📖 Coran et apprentissage',srow('Pages lues (défis)',pgT+' en '+Object.keys(pgD).length+' j')+srow('Sourates courtes apprises',nS+' / '+SR.length)+srow('Noms d’Allah appris',nN+' / 99')+srow('Sourate Al-Kahf (vendredis cochés)',kh)+srow('Jours de jeûne accomplis',fdn)+srow('Jours à rattraper',ow));
+ var cnt={},nm={};(S.menuLog||[]).forEach(function(x){var k=norm(x.t);if(!k)return;cnt[k]=(cnt[k]||0)+1;if(!nm[k])nm[k]=x.t});
+ var pl=Object.keys(cnt).map(function(k){return[nm[k],cnt[k]]}).sort(function(a,b){return b[1]-a[1]||a[0].localeCompare(b[0])}),top=pl.slice(0,5),low=pl.length>5?pl.slice(-3).reverse():[];
+ var rc=Object.keys(S.recLog||{}).map(function(i){return[REC[+i]&&REC[+i][0],S.recLog[i]]}).filter(function(x){return x[0]}).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
+ var ig=Object.keys(S.ingStat||{}).map(function(k){return[k,S.ingStat[k].n,S.ingStat[k].c]}).sort(function(a,b){return b[2]-a[2]||a[1].localeCompare(b[1])}).slice(0,10);
+ var li=function(a){return a.map(function(x){return srow(esc(x[0]),'× '+x[1])}).join('')};
+ h+=sec('🍲 Cuisine',(top.length?'<div class="mut">Plats les plus souvent au menu</div>'+li(top):'<p class="mut">Note tes plats dans Cuisine › Menus : les statistiques se construisent au fil des semaines.</p>')+(low.length?'<div class="mut" style="margin-top:8px">Plats les moins souvent faits</div>'+li(low):'')+(rc.length?'<div class="mut" style="margin-top:8px">Recettes les plus ajoutées aux courses</div>'+li(rc):'')
+  +(ig.length?'<div class="mut" style="margin-top:12px">Ingrédients les plus utilisés</div>'+ig.map(function(x){return'<div class="it"><span>'+esc(x[1])+' <span class="mut">× '+x[2]+'</span></span><button class="btn" data-a="stadd" data-id="'+x[0]+'" aria-label="Ajouter aux courses">+ courses</button></div>'}).join(''):'')+(stMsg?'<p class="mut">'+stMsg+'</p>':'')+'<p class="mut" style="font-size:12px">Les statistiques de cuisine démarrent avec tes menus et tes ajouts à la liste de courses.</p>');
+ var w30=dayList(30),wv=w30.map(function(d){return S.water[d]||0}),wd=wv.filter(function(v){return v>0}).length,ws=wv.reduce(function(a,b){return a+b},0),w8=wv.filter(function(v){return v>=8}).length,ME=['😔','😐','🙂','😊','🥰','😰'],mc={};
+ w30.forEach(function(d){var m=S.mood[d];if(m!=null)mc[m]=(mc[m]||0)+1});
+ h+=sec('💧 Bien-être (30 jours)',srow('Hydratation moyenne',wd?f1(ws/wd)+' verres par jour':'—')+srow('Jours à 8 verres',w8)+(Object.keys(mc).length?'<div class="row wrap" style="margin-top:8px">'+Object.keys(mc).map(function(k){return'<span class="btn">'+ME[k]+' × '+mc[k]+'</span>'}).join('')+'</div><p class="mut" style="font-size:12px">Répartition de tes humeurs.</p>':''));
+ var milk=((S.lait&&S.lait.base)||0)+((S.lait&&S.lait.log)||[]).filter(function(z){return z.type==='add'}).reduce(function(a,z){return a+z.ml},0),tk=(S.tasks||[]);
+ h+=sec('✨ Et aussi',srow('Photos dans Souvenirs','<span id="st-ph">…</span>')+(milk>0?srow('Lait maternel tiré depuis le début',milk+' ml'):'')+srow('Tâches terminées (matrice)',tk.filter(function(t){return t.d}).length+' / '+tk.length)+srow('Événements au calendrier',(S.ev||[]).filter(function(e){return!e.src}).length));
+ return h}
+V.stat=function(){return'<h2>Bilan</h2><p class="mut">Un regard sur tes habitudes, calculé sur cet appareil. Les données de santé et de cycle n’y sont pas incluses.</p>'+statView()};
 
 draw();
 })();
