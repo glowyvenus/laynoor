@@ -1,17 +1,18 @@
 /* LAYNOOR – patch : aujourd'hui, Jumu'a, explication des jeûnes, météo, Qibla */
 (function(){
-var css=':root{--cu:#B5683F;--gold:#F1DFA8;--goldd:#A9822A}'
-+'.cal .today{background:#C9677F!important;color:#fff!important;border-radius:12px;box-shadow:0 0 0 2px var(--card),0 0 0 4px #F2C6D1}'
-+'.cal .today .cn{color:#FFE3EA!important}'
+var css=':root{--cu:#B5683F;--gold:#F1DFA8;--goldd:#A9822A;--yel:#F7D54A;--grn:#D5E0C8;--grn2:#5E7456}'
++'.cal .today{background:var(--yel)!important;color:#3F3200!important;border-radius:12px;box-shadow:0 0 0 2px var(--card),0 0 0 4px #FBE9A0}'
++'.cal .today .cn{color:#6B5600!important}'
 +'.cal:not(.ecal)>button{position:relative}'
-+'.cal:not(.ecal)>button:nth-child(7n+5):not(.today):not(.jb):not(.rm):not(.pd){background:var(--gold);color:#5C4713}'
-+'.cal:not(.ecal)>button:nth-child(7n+5)::before{content:"✦";position:absolute;top:1px;right:4px;font-size:8px;color:var(--goldd)}'
-+'.cal:not(.ecal)>button:nth-child(7n+5).today::before{color:#fff}';
-css+='.quad{grid-template-columns:1fr!important}.q{min-height:0!important}.q .ln{font-size:14.5px}.q h4{font-size:13px}';
-/* nom de l'app + manifest (automatique) */
-document.title='LAYNOOR';
-[['apple-mobile-web-app-title','LAYNOOR'],['application-name','LAYNOOR']].forEach(function(m){var e=document.querySelector('meta[name="'+m[0]+'"]');if(!e){e=document.createElement('meta');e.name=m[0];document.head.appendChild(e)}e.content=m[1]});
-if(!document.querySelector('link[rel="manifest"]')){var mf=document.createElement('link');mf.rel='manifest';mf.href='manifest.json?v=2';document.head.appendChild(mf)}
++'.cal:not(.ecal)>button:nth-child(7n+5):not(.today):not(.jb):not(.rm){background:var(--grn)!important;color:var(--ink)}'
++'.cal:not(.ecal)>button:nth-child(7n+5)::before{content:"✦";position:absolute;top:1px;right:4px;font-size:8px;color:var(--grn2)}'
++'.cal:not(.ecal)>button:nth-child(7n+5).today::before{color:#6B5600}'
++'.cal:not(.ecal) .rm{background:var(--sage2)!important;color:#fff!important}'
++'.cal:not(.ecal) .fj:not(.today){box-shadow:inset 0 -4px 0 #fff,0 2px 0 var(--line)!important}'
++'.cal:not(.ecal) .today.fj{box-shadow:0 0 0 2px var(--card),0 0 0 4px #FBE9A0,inset 0 -4px 0 #fff!important}'
++'.cal:not(.ecal) .pd:not(.today):not(.rm),.cal:not(.ecal) .fw:not(.today):not(.rm),.cal:not(.ecal) .ov:not(.today):not(.rm){background:transparent!important;color:inherit!important}'
++'.cal:not(.ecal) .cn{display:none}'
++'.pd-mk{position:absolute;top:3px;left:5px;width:5px;height:5px;border-radius:50%;background:var(--heart);opacity:.8}';
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
 var hm=new Intl.DateTimeFormat('fr-FR-u-ca-islamic-umalqura-nu-latn',{month:'long'});
@@ -76,8 +77,8 @@ function enhance(){
  if(page==='org'&&sub.org==='agenda'){var cg=document.querySelector('.cal:not(.ecal)'),cc=cg&&cg.closest('.card');
   if(cc&&!cc.querySelector('.lg-box')){var sw=function(s,l){return'<span style="display:inline-flex;align-items:center;gap:6px"><i style="display:inline-block;width:16px;height:16px;border-radius:5px;'+s+'"></i>'+l+'</span>'},cy=S.showCyc!==false&&S.cyc&&S.cyc.start;
    cc.insertAdjacentHTML('beforeend','<div class="lg-box" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><div class="mut" style="margin-bottom:6px">Légende</div><div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px">'
-    +sw('background:#C9677F','Aujourd’hui')+sw('background:var(--gold)','Vendredi (Jumu’a)')+sw('background:#fff;box-shadow:inset 0 0 0 1.5px var(--sage2)','Jour blanc (13-14-15 du mois hégirien)')+sw('background:var(--card);border:1px solid var(--line);box-shadow:inset 0 -4px 0 var(--sage2)','Lundi ou jeudi (jeûne sunna)')+sw('background:none;outline:1.5px dashed var(--sage2)','Jour à rattraper')+sw('background:var(--sage2)','Ramadan (vert)')
-    +(cy?sw('background:var(--rose)','Règles (estimation)')+sw('background:var(--sage)','Fenêtre fertile')+sw('background:var(--pg2)','Ovulation probable'):'')+'</div>'+(cy?'<div class="mut" style="margin-top:8px;font-size:12px">Le petit chiffre au-dessus de la date est le jour de ton cycle. Le point sous une date indique un rendez-vous.</div>':'<div class="mut" style="margin-top:8px;font-size:12px">Le point sous une date indique un rendez-vous.</div>')+'</div>')}}
+    +sw('background:#F7D54A','Aujourd’hui')+sw('background:#D5E0C8','Vendredi (Jumu’a)')+sw('background:#fff;box-shadow:inset 0 0 0 1.5px var(--sage2)','Jour blanc (13-14-15 du mois hégirien)')+sw('background:#fff;border:1px solid var(--line);box-shadow:inset 0 -4px 0 #fff,0 2px 0 var(--line)','Lundi ou jeudi (jeûne sunna)')+sw('background:none;outline:1.5px dashed var(--sage2)','Jour à rattraper')+sw('background:var(--sage2)','Ramadan (vert foncé)')
+    +(cy?sw('background:var(--heart);border-radius:50%;width:8px;height:8px','Règles (petit point discret)'):'')+'</div>'+(cy?'<div class="mut" style="margin-top:8px;font-size:12px">Le point sous une date indique un rendez-vous.</div>':'<div class="mut" style="margin-top:8px;font-size:12px">Le point sous une date indique un rendez-vous.</div>')+'</div>')}}
  if(page==='enf')document.querySelectorAll('p.mut').forEach(function(x){if(x.textContent.indexOf('dans Profils')>-1)x.textContent=x.textContent.replace('dans Profils','dans Réglages › Profils')});
  if(page==='home'){var hr=document.querySelector('.hero');
   if(hr&&!hr.dataset.g){hr.dataset.g=1;var h1=hr.querySelector('h1');if(h1)h1.insertAdjacentHTML('afterend','<p class="mut" style="margin:2px 0 8px;line-height:1.5">Un espace clair, tendre et à votre rythme.<br>Vous n’avez pas à tout porter seule.</p>')}
@@ -103,13 +104,18 @@ function enhance(){
   ec.forEach(function(b){var r=((S.cyc.log||{})[b.dataset.id]||{}).rap;if(r&&!b.querySelector('.rap-mk')){b.style.position='relative';b.insertAdjacentHTML('beforeend','<i class="rap-mk" style="position:absolute;bottom:0;left:50%;margin-left:-4px;font-size:7px;font-style:normal;color:var(--heart)">'+(r==='Non protégé'?'◆':'◇')+'</i>')}});
   var ecd=document.querySelector('.ecal');if(ecd&&!document.getElementById('rap-lg')){var cc2=ecd.closest('.card');if(cc2)cc2.insertAdjacentHTML('beforeend','<div class="mut" id="rap-lg" style="font-size:11px;margin-top:6px">◆ rapport non protégé · ◇ rapport protégé</div>')}}
  if(page==='stat'){var sp=document.getElementById('st-ph');if(sp)tx('readonly',function(s){return s.count()}).then(function(n){var e=document.getElementById('st-ph');if(e)e.textContent=n}).catch(function(){})}
- if(page==='home'&&!document.getElementById('sr-btn')){var hr2=A.querySelector('.hero');if(hr2)hr2.insertAdjacentHTML('afterend','<button id="sr-btn" class="btn" data-a="go" data-id="search" style="width:100%;margin:10px 0;text-align:left">🔍 Rechercher dans LAYNOOR…</button>')}
+ if(page==='home'&&!document.getElementById('sr-btn')){var pt=Array.prototype.slice.call(A.querySelectorAll('.card h3')).filter(function(h){return h.textContent.trim()==='Priorités'})[0],anc=pt&&pt.closest('.card'),bt='<button id="sr-btn" class="btn" data-a="go" data-id="search" style="width:100%;margin:10px 0;text-align:left">🔍 Rechercher dans LAYNOOR…</button>';if(anc)anc.insertAdjacentHTML('afterend',bt);else A.insertAdjacentHTML('beforeend',bt)}
  if(page==='search'){var qi=document.getElementById('q-in');if(qi&&!qi.dataset.f){qi.dataset.f=1;try{qi.focus()}catch(e){}}}
  if(page==='home'){var cl=A.querySelector('.cal'),cc3=cl&&cl.closest('.card');
   if(cc3&&!cc3.dataset.wk){cc3.dataset.wk=1;Array.prototype.slice.call(cc3.querySelectorAll('.it')).forEach(function(r){r.remove()});
    Array.prototype.slice.call(cc3.querySelectorAll('p.mut')).forEach(function(q){if(q.textContent.indexOf('Rien de prévu')>-1)q.remove()});
    var wend=addD(mondayKey(),6),wev=(S.ev||[]).filter(function(e){return e.date>=today&&e.date<=wend}).sort(function(a,b){return(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))}).slice(0,6);
    cl.insertAdjacentHTML('afterend',wev.length?wev.map(function(e){return'<div class="it"><span class="t" style="margin:0">'+(e.date===today?(e.time||'—'):new Date(e.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric'}))+'</span><span>'+esc(e.t)+'</span></div>'}).join(''):'<p class="mut">Rien de prévu cette semaine.</p>')}}
+ if(page==='home'){var g3=Array.prototype.slice.call(A.querySelectorAll('.card h3')).filter(function(h){return h.textContent.indexOf('gratitude')>-1})[0];if(g3){var gcd=g3.closest('.card');if(gcd)gcd.remove()}
+  var hyd=Array.prototype.slice.call(A.querySelectorAll('.card')).filter(function(c){var b=c.querySelector('b');return b&&b.textContent.trim()==='Hydratation'})[0],hum=Array.prototype.slice.call(A.querySelectorAll('.card h3')).filter(function(h){return h.textContent.trim()==='Humeur'})[0];
+  if(hyd&&hum){var hcd=hum.closest('.card');if(hcd&&hyd.nextElementSibling!==hcd)hyd.insertAdjacentElement('afterend',hcd)}}
+ document.querySelectorAll('.cal:not(.ecal)>button.pd').forEach(function(b){if(!b.querySelector('.pd-mk'))b.insertAdjacentHTML('beforeend','<i class="pd-mk"></i>')});
+ var ic=document.getElementById('ics-card');if(ic&&!ic.dataset.t){ic.dataset.t=1;var ih=ic.firstElementChild;if(ih&&ih.tagName==='H3'){var wr=document.createElement('div');wr.className='row sp';ih.parentNode.insertBefore(wr,ih);wr.appendChild(ih);ih.style.margin='0';wr.insertAdjacentHTML('beforeend','<button class="btn" data-a="icsh" style="padding:4px 12px;font-size:12px">'+(S.icsShow?'Masquer':'Afficher')+'</button>');if(!S.icsShow)Array.prototype.slice.call(ic.children).forEach(function(c){if(c!==wr)c.style.display='none'})}}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -174,7 +180,7 @@ function tx(mode,fn){return idb().then(function(d){return new Promise(function(r
 function rs(file,max,q){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej()},'image/jpeg',q)};im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u})}
 V.souv=function(){return'<h2>Souvenirs</h2><div class="card"><p class="mut">Dépose ici tes photos, les premiers pas, les dessins, les petits moments à garder… Ajoute une légende : tout reste uniquement sur cet appareil, et les photos sont compressées pour économiser la place.</p><button class="btn d" id="sv-add">📸 Ajouter des photos</button><input type="file" id="sv-file" accept="image/*" multiple style="display:none"><p class="mut" id="sv-msg"></p></div><div id="sv-grid"></div><p class="mut">Les photos ne sont pas incluses dans la sauvegarde de Réglages : garde aussi tes originaux dans Photos.</p>'};
 function svLoad(){tx('readonly',function(s){return s.getAll()}).then(function(a){var g=document.getElementById('sv-grid');if(!g)return;
- SVL=(a||[]).sort(function(x,y){return y.d.localeCompare(x.d)||y.id-x.id});
+ SVL=(a||[]).filter(function(r){return(r.k||'inst')===(sub.souv==='dess'?'dess':'inst')}).sort(function(x,y){return y.d.localeCompare(x.d)||y.id-x.id});
  if(!SVL.length){g.innerHTML='<div class="card"><p class="mut">Aucune photo pour l’instant. Ajoute ton premier souvenir ♡</p></div>';return}
  var h='',m='';SVL.forEach(function(r,i){var k=r.d.slice(0,7);if(k!==m){if(m)h+='</div>';m=k;h+='<h3 style="margin:16px 4px 8px;text-transform:capitalize">'+new Date(r.d+'T12:00').toLocaleDateString('fr-FR',{month:'long',year:'numeric'})+'</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">'}
   var u=tu[r.id]=tu[r.id]||URL.createObjectURL(r.th);h+='<img src="'+u+'" data-sv="open" data-i="'+i+'" alt="'+esc(r.cap||'Souvenir')+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:pointer">'});
@@ -199,7 +205,7 @@ document.addEventListener('change',function(e){var t=e.target;
  if(!fs.length)return;if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
  (function nx(i){if(i>=fs.length){if(msg)msg.textContent=n+' photo'+(n>1?'s ajoutées':' ajoutée')+(n<fs.length?' ('+(fs.length-n)+' impossible'+(fs.length-n>1?'s':'')+' à lire)':'')+' ♡';svLoad();return}
   if(msg)msg.textContent='Import en cours… '+(i+1)+'/'+fs.length;
-  var f=fs[i];Promise.all([rs(f,1600,.82),rs(f,360,.72)]).then(function(b){return svPut({id:Date.now()+i,d:iso(new Date(f.lastModified||Date.now())),cap:'',full:b[0],th:b[1]})}).then(function(){n++;nx(i+1)}).catch(function(){nx(i+1)})})(0)});
+  var f=fs[i];Promise.all([rs(f,1600,.82),rs(f,360,.72)]).then(function(b){return svPut({id:Date.now()+i,d:iso(new Date(f.lastModified||Date.now())),cap:'',k:sub.souv==='dess'?'dess':'inst',full:b[0],th:b[1]})}).then(function(){n++;nx(i+1)}).catch(function(){nx(i+1)})})(0)});
 
 /* ===== Menus : vraie liste d'ingrédients ===== */
 function ingList(d){S.ingL=S.ingL||{};if(!S.ingL[d])S.ingL[d]=(S.ing&&S.ing[d]?String(S.ing[d]).split(',').map(function(s){return s.trim()}).filter(Boolean):[]);return S.ingL[d]}
@@ -378,7 +384,7 @@ function bkSheet(f){var v=document.createElement('div');v.style.cssText='positio
  document.getElementById('bk-go').onclick=function(){bkShare(f).then(function(){v.remove()})};document.getElementById('bk-x').onclick=function(){v.remove()}}
 act.bkex=function(){var a=document.activeElement;if(a&&a.blur)a.blur();S.lastBk=Date.now();save();bkShare(new File([JSON.stringify({app:'laynoor',v:2,date:new Date().toISOString(),data:S})],'laynoor-sauvegarde.json',{type:'application/json'}))};
 act.bkexp=function(){var a=document.activeElement;if(a&&a.blur)a.blur();
- tx('readonly',function(s){return s.getAll()}).then(function(ps){return Promise.all((ps||[]).map(function(r){return Promise.all([b2d(r.full),b2d(r.th)]).then(function(b){return{id:r.id,d:r.d,cap:r.cap,full:b[0],th:b[1]}})}))}).then(function(arr){S.lastBk=Date.now();save();bkSheet(new File([JSON.stringify({app:'laynoor',v:2,date:new Date().toISOString(),data:S,photos:arr})],'laynoor-sauvegarde-photos.json',{type:'application/json'}))}).catch(function(){alert('Impossible de lire les photos pour la sauvegarde.')})};
+ tx('readonly',function(s){return s.getAll()}).then(function(ps){return Promise.all((ps||[]).map(function(r){return Promise.all([b2d(r.full),b2d(r.th)]).then(function(b){return{id:r.id,d:r.d,cap:r.cap,k:r.k||'inst',full:b[0],th:b[1]}})}))}).then(function(arr){S.lastBk=Date.now();save();bkSheet(new File([JSON.stringify({app:'laynoor',v:2,date:new Date().toISOString(),data:S,photos:arr})],'laynoor-sauvegarde-photos.json',{type:'application/json'}))}).catch(function(){alert('Impossible de lire les photos pour la sauvegarde.')})};
 document.addEventListener('change',function(e){if(e.target.id!=='bkf')return;var f=e.target.files[0];if(!f)return;var r=new FileReader();
  r.onload=function(){var o;try{o=JSON.parse(r.result)}catch(x){alert('Fichier de sauvegarde invalide.');return}
   var data=o&&o.app==='laynoor'&&o.data?o.data:o;if(!data||typeof data!=='object'||Array.isArray(data)){alert('Fichier de sauvegarde invalide.');return}
@@ -386,7 +392,7 @@ document.addEventListener('change',function(e){if(e.target.id!=='bkf')return;var
   if(!confirm('Remplacer toutes les données de cet appareil par cette sauvegarde'+(o.date?' du '+new Date(o.date).toLocaleDateString('fr-FR'):'')+' ?\n'+((data.ev||[]).length)+' rendez-vous'+(np?', '+np+' photos':'')+'.'))return;
   var done=function(){try{localStorage.setItem('laynoor',JSON.stringify(data))}catch(x){alert('Impossible d’écrire la sauvegarde sur cet appareil.');return}alert('Sauvegarde restaurée ♡');location.reload()};
   if(!np){done();return}
-  var i=0;(function nx(){if(i>=np){done();return}var p=ph[i++];Promise.all([fetch(p.full).then(function(x){return x.blob()}),fetch(p.th).then(function(x){return x.blob()})]).then(function(b){return svPut({id:p.id,d:p.d,cap:p.cap||'',full:b[0],th:b[1]})}).then(nx).catch(nx)})()};
+  var i=0;(function nx(){if(i>=np){done();return}var p=ph[i++];Promise.all([fetch(p.full).then(function(x){return x.blob()}),fetch(p.th).then(function(x){return x.blob()})]).then(function(b){return svPut({id:p.id,d:p.d,cap:p.cap||'',k:p.k||'inst',full:b[0],th:b[1]})}).then(nx).catch(nx)})()};
  r.readAsText(f)});
 
 /* ===== Ordre du menu ===== */
@@ -628,7 +634,7 @@ document.addEventListener('change',function(e){var t=e.target,a=t.dataset&&t.dat
 addEventListener('online',function(){draw()});addEventListener('offline',function(){draw()});
 
 /* ===== Cycle : rapports ===== */
-var _cv=cycleView;cycleView=function(){var h=_cv(),t=lgd(csel),m='<div class="card"><h3>Symptômes</h3>',c='<div class="card"><h3>Rapports</h3><div class="row wrap">'+chp('rap','Non protégé',t.rap==='Non protégé')+chp('rap','Protégé',t.rap==='Protégé')+'</div><p class="mut" style="font-size:12px">Repère personnel pour suivre ta fenêtre fertile. Ce suivi ne remplace ni une contraception ni un avis médical.</p></div>';return h.indexOf(m)>-1?h.replace(m,c+m):h+c};
+/* cycleView : voir plus bas */
 
 /* ===== Dates importantes (anniversaires…) ===== */
 var DTY={anniv:['🎂','Anniversaire'],mariage:['💍','Anniversaire de mariage'],autre:['📌','Autre date']};
@@ -734,7 +740,7 @@ var SX=[['Météo','home',null,'Accueil','meteo temperature temps pluie soleil']
 ['Suivi du cycle','well','cycle','Oummi › Cycle','cycle regles ovulation fertile symptomes temperature glaire symptothermie rapports humeur'],
 ['Tirage (lait)','well','tirage','Oummi › Tirage','tirage tire lait plan objectif stock seances absence reprise travail'],
 ['Suivi de grossesse','well','preg','Oummi › Grossesse','grossesse terme date des dernieres regles echographie semaines amenorrhee sa'],
-['Souvenirs (photos)','souv',null,'Souvenirs','souvenirs photos premiers pas dessins legende'],
+['Instants (photos)','souv','inst','Souvenirs › Instants','souvenirs photos instants premiers pas legende'],['Gratitude du jour','souv','grat','Souvenirs › Gratitude','gratitude merci remercier petits mots journal'],['Dessins','souv','dess','Souvenirs › Dessins','dessins dessin coloriage enfant bricolage'],
 ['Assistante IA','ia',null,'IA','ia assistante chat'],
 ['Bilan et statistiques','stat',null,'Bilan','bilan statistiques moyenne prieres dhikr plats ingredients'],
 ['Profils de la famille','set',null,'Réglages › Profils','profils famille enfant naissance prenom'],
@@ -759,6 +765,53 @@ V.search=function(){return'<h2>Recherche</h2><input id="q-in" placeholder="Un mo
 document.addEventListener('input',function(e){if(e.target.id!=='q-in')return;SQ=e.target.value;var r=document.getElementById('q-res');if(r)r.innerHTML=srchHtml()});
 act.sq=function(id){SQ=id};
 act.gosearch=function(id){var r=SRCH[+id];if(!r)return;page=r.p;if(r.s)sub[r.p]=r.s;if(r.x)Object.keys(r.x).forEach(function(k){sub[k]=r.x[k]});menuOpen=false;toast='';scrollTo(0,0)};
+
+/* ===== Souvenirs : Instants / Gratitude / Dessins ===== */
+sub.souv='inst';
+function gratView(){var G=S.grat||{},ds=Object.keys(G).filter(function(d){return G[d]&&String(G[d]).trim()}).sort().reverse(),old=ds.filter(function(d){return d!==today});
+ return'<div class="card"><h3>Ma gratitude du jour 🤍</h3><textarea data-n="gr" rows="3" placeholder="Aujourd’hui, je remercie Allah pour…">'+esc(G[today]||'')+'</textarea><p class="mut" style="font-size:12px">'+ds.length+' jour'+(ds.length>1?'s':'')+' de gratitude gardé'+(ds.length>1?'s':'')+'.</p></div>'
+ +(old.length?'<div class="card"><h3>Mes petits mots</h3>'+old.map(function(d){return'<details><summary><b>'+fdy(d)+'</b></summary><textarea data-n="grd" data-id="'+d+'" rows="2" style="margin-top:6px">'+esc(G[d])+'</textarea></details>'}).join('')+'</div>':'')}
+document.addEventListener('change',function(e){var t=e.target;if(!t.dataset||t.dataset.n!=='grd')return;e.stopImmediatePropagation();S.grat=S.grat||{};S.grat[t.dataset.id]=t.value;save()},true);
+var _sv0=V.souv;V.souv=function(){if(['inst','grat','dess'].indexOf(sub.souv)<0)sub.souv='inst';var T=tabs('souv',[['inst','Instants 📷'],['grat','Gratitude'],['dess','Dessins 🎨']]);
+ if(sub.souv==='grat')return'<h2>Souvenirs</h2>'+T+gratView();
+ var h=_sv0().replace('<h2>Souvenirs</h2>','<h2>Souvenirs</h2>'+T);
+ return h.replace(/Dépose ici[^<]*/,sub.souv==='dess'?'Photographie les dessins de tes enfants et garde-les ici, avec une légende. Tout reste uniquement sur cet appareil.':'Dépose ici tes photos, les premiers pas, les petits moments à garder… Ajoute une légende : tout reste uniquement sur cet appareil, et les photos sont compressées pour économiser la place.')};
+act.icsh=function(){S.icsShow=!S.icsShow};
+
+/* ===== Cycle : période actuelle en haut, saisie simplifiée, plus de symptômes ===== */
+var SYG=[['Courants',SYM.concat(['Nausées','Maux de dos'])],['Ovulation',['Douleur d’ovulation (bas-ventre, d’un seul côté)','Pertes plus abondantes ou glissantes','Spotting d’ovulation','Libido en hausse','Énergie en hausse','Odorat plus sensible','Col de l’utérus plus haut, souple et ouvert']],['SPM / TDPM',['Irritabilité ou colère','Anxiété, tension intérieure','Tristesse, humeur dépressive','Sautes d’humeur','Pleurs faciles','Sentiment d’être dépassée','Difficulté à se concentrer','Perte d’intérêt','Faim ou envies alimentaires','Insomnie ou besoin de dormir plus','Douleurs articulaires ou musculaires','Migraine']]];
+function symCard(t){var sy=t.sy||{};return'<div class="card"><h3>Symptômes</h3><div class="mut" style="font-size:12px">Du plus faible au plus intense</div>'+SYG.map(function(g){var any=g[1].some(function(s){return sy[s]>0});return'<details '+(g[0]==='Courants'||any?'open':'')+'><summary><b>'+g[0]+'</b></summary>'+g[1].map(function(s){return'<div style="margin-top:8px"><div>'+s+'</div>'+rng('sy|'+s,sy[s],4)+'</div>'}).join('')+(g[0]==='SPM / TDPM'?'<p class="mut" style="font-size:12px">Les noter avant tes règles aide à repérer un schéma (SPM ou TDPM). Ce n’est pas un diagnostic : si cela pèse sur ton quotidien, parles-en à un professionnel de santé.</p>':'')+'</details>'}).join('')+'</div>'}
+function tgLast(){var lg=(S.cyc&&S.cyc.log)||{},ds=Object.keys(lg).filter(function(d){return lg[d].rap==='Non protégé'}).sort();if(!ds.length)return null;var last=ds[ds.length-1];return anchors().some(function(a){return a>last})?null:last}
+function tgInfo(){if(!S.tgRem)return null;var l=tgLast();if(!l)return null;var n=difD(today,l);return n>=0&&n<=35?{d:l,n:n}:null}
+function syncTg(){S.ev=(S.ev||[]).filter(function(e){return e.src!=='tg'});var l=S.tgRem&&tgLast();if(l){[10,15].forEach(function(n){S.ev.push({id:'tg-'+l+'-'+n,t:'🔔 Rappel perso',date:addD(l,n),time:'',src:'tg'})})}}
+function tgCard(g){var n=g.n,m;
+ if(n<10)m='Rapport non protégé le '+fd(g.d)+'. Un test fait trop tôt peut être faussement négatif : rappel prévu à J+10.';
+ else if(n<14)m='Rapport non protégé il y a '+n+' jours. Le test urinaire est fiable dès le 1ᵉʳ jour de retard de règles ou 21 jours après le rapport ; une prise de sang (bêta-hCG) est possible environ 14 jours après le rapport.';
+ else if(n<21)m='Rapport non protégé il y a '+n+' jours. Une prise de sang (bêta-hCG) est possible ; le test urinaire est fiable dès le 1ᵉʳ jour de retard de règles ou 21 jours après le rapport.';
+ else m='Rapport non protégé il y a '+n+' jours et pas de règles enregistrées depuis : un test urinaire est fiable maintenant. En cas de doute, parles-en à un médecin, une sage-femme ou un pharmacien.';
+ return'<div class="card" style="border-color:var(--heart)"><b>🔔 Rappel test de grossesse</b><p class="mut" style="margin:6px 0 0">'+m+'</p></div>'}
+function cycleTop(){var I=cyI(),tg=tgInfo(),h='';
+ if(!I)h='<div class="card"><h3>Ta période actuelle</h3><p class="mut">Touche un jour dans le calendrier ci-dessous et note « Règles » dans Saignement : LAYNOOR calculera ta période actuelle, tes prochaines règles et ton ovulation probable.</p></div>';
+ else{var ov=addD(I.last,I.o),dOv=difD(ov,today),ms=[];
+  ms.push(I.dn<0?'Règles en retard de '+(-I.dn)+' jour'+(-I.dn>1?'s':''):I.dn===0?'Règles prévues aujourd’hui':I.dn<=2?'Règles imminentes (dans '+I.dn+' jour'+(I.dn>1?'s':'')+')':'Règles prévues dans '+I.dn+' jours (vers le '+fd(I.nxs)+')');
+  if(dOv>0&&dOv<=14)ms.push('Ovulation probable dans '+dOv+' jour'+(dOv>1?'s':'')+' (vers le '+fd(ov)+')');else if(dOv===0)ms.push('Ovulation probable aujourd’hui');
+  h='<div class="card" style="background:var(--rose)"><div class="mut">Ta période actuelle · jour '+I.day+' du cycle</div><h2 style="margin:4px 0 6px">'+I.ph+'</h2><p style="margin:0 0 6px"><b>'+I.ch+'</b></p>'+ms.map(function(m){return'<div>• '+m+'</div>'}).join('')+sBar(Math.min(100,I.day/I.L*100))+'<div class="mut" style="font-size:12px">Estimations à environ ± 2 jours près, d’après tes derniers cycles. Elles ne remplacent pas un avis médical.</div></div>'}
+ return tg?h+tgCard(tg):h}
+var _cv=cycleView;cycleView=function(){var h=_cv(),t=lgd(csel),cards=h.split(/(?=<div class="card")/),pick=function(m){return cards.filter(function(c){return c.indexOf(m)>-1})[0]||''},
+ cal=pick('data-a="cmon"'),day=pick('Intensité de la douleur'),temp=pick('<h3>Température et glaire cervicale</h3>'),mood=pick('<h3>Humeur et notes</h3>'),stats=pick('<h3>Mon cycle en chiffres</h3>');
+ if(!t.bt){day=day.replace(/<div class="mut" style="margin-top:10px">Intensité du flux<\/div>[\s\S]*?(?=<div class="mut" style="margin-top:10px">Intensité de la douleur<\/div>)/,'').replace(/<div class="mut" style="margin-top:10px">Présence de caillots<\/div><div class="row">[\s\S]*?<\/div>/,'')}
+ var ec=t.rap==='Non protégé'&&difD(today,csel)>=0&&difD(today,csel)<=5?'<p class="mut" style="font-size:12px">Contraception d’urgence possible jusqu’à 3 jours après le rapport (lévonorgestrel) ou 5 jours (ulipristal), en pharmacie.</p>':'',
+ rap='<div class="card"><h3>Rapports</h3><div class="row wrap">'+chp('rap','Non protégé',t.rap==='Non protégé')+chp('rap','Protégé',t.rap==='Protégé')+'</div>'+ec+'<div class="row" style="margin-top:10px"><button class="btn '+(S.tgRem?'d':'')+'" data-a="tgtog">🔔 Rappel de test de grossesse : '+(S.tgRem?'activé':'désactivé')+'</button></div><p class="mut" style="font-size:12px">Après un rapport non protégé sans règles enregistrées ensuite, un rappel apparaît au calendrier à J+10 et J+15 (« Rappel perso »). Ce suivi ne remplace ni une contraception ni un avis médical.</p></div>',
+ st=stats?'<div class="card"><details><summary><b>Mon cycle en chiffres</b></summary>'+stats.replace('<div class="card"><h3>Mon cycle en chiffres</h3>','').replace(/<\/div>\s*$/,'')+'</details></div>':'';
+ return cycleTop()+cal+day+mood+rap+symCard(t)+temp+st};
+var _cl=act.cl;act.cl=function(id){_cl(id);if(id.indexOf('bt|')===0)btSync();if(id.indexOf('rap|')===0)syncTg()};
+function btSync(){var t=lgd(csel),L=S.cyc.log||{},c=S.cyc;c.hist=c.hist||[];
+ if(t.bt==='Règles'){var pv=addD(csel,-1),nx=addD(csel,1),k=c.hist.indexOf(nx);if(!(L[pv]&&L[pv].bt==='Règles')&&c.hist.indexOf(csel)<0)c.hist.push(csel);if(L[nx]&&L[nx].bt==='Règles'&&k>-1)c.hist.splice(k,1)}
+ else{var k2=c.hist.indexOf(csel);if(k2>-1){c.hist.splice(k2,1);var nx2=addD(csel,1);if(L[nx2]&&L[nx2].bt==='Règles')c.hist.push(nx2)}}
+ cyAuto();var s=c.hist.slice().sort().pop();if(s){var n=0;while(L[addD(s,n)]&&L[addD(s,n)].bt==='Règles')n++;if(n>=2&&n<=12)c.dur=n}syncTg()}
+act.tgtog=function(){S.tgRem=!S.tgRem;syncTg()};
+var _og2=V.org;V.org=function(){syncTg();return _og2()};
+syncTg();
 
 draw();
 })();
