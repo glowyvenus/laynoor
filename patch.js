@@ -12,7 +12,9 @@ var css=':root{--cu:#B5683F;--gold:#F1DFA8;--goldd:#A9822A;--yel:#F7D54A;--grn:#
 +'.cal:not(.ecal) .today.fj{box-shadow:0 0 0 2px var(--card),0 0 0 4px #FBE9A0,inset 0 -4px 0 #fff!important}'
 +'.cal:not(.ecal) .pd:not(.today):not(.rm),.cal:not(.ecal) .fw:not(.today):not(.rm),.cal:not(.ecal) .ov:not(.today):not(.rm){background:transparent!important;color:inherit!important}'
 +'.cal:not(.ecal) .cn{display:none}'
-+'.pd-mk{position:absolute;top:3px;left:5px;width:5px;height:5px;border-radius:50%;background:var(--heart);opacity:.8}';
++'.pd-mk{position:absolute;top:3px;left:5px;width:5px;height:5px;border-radius:50%;background:var(--heart);opacity:.8}'
++'.nav{transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);will-change:transform}'
++'input[type=range]{touch-action:pan-y}';
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
 var hm=new Intl.DateTimeFormat('fr-FR-u-ca-islamic-umalqura-nu-latn',{month:'long'});
@@ -116,6 +118,7 @@ function enhance(){
   if(hyd&&hum){var hcd=hum.closest('.card');if(hcd&&hyd.nextElementSibling!==hcd)hyd.insertAdjacentElement('afterend',hcd)}}
  document.querySelectorAll('.cal:not(.ecal)>button.pd').forEach(function(b){if(!b.querySelector('.pd-mk'))b.insertAdjacentHTML('beforeend','<i class="pd-mk"></i>')});
  var ic=document.getElementById('ics-card');if(ic&&!ic.dataset.t){ic.dataset.t=1;var ih=ic.firstElementChild;if(ih&&ih.tagName==='H3'){var wr=document.createElement('div');wr.className='row sp';ih.parentNode.insertBefore(wr,ih);wr.appendChild(ih);ih.style.margin='0';wr.insertAdjacentHTML('beforeend','<button class="btn" data-a="icsh" style="padding:4px 12px;font-size:12px">'+(S.icsShow?'Masquer':'Afficher')+'</button>');if(!S.icsShow)Array.prototype.slice.call(ic.children).forEach(function(c){if(c!==wr)c.style.display='none'})}}
+ if(['org','home','well'].indexOf(page)>-1&&S.cyc){var A0=anchors(),f0=A0[0];document.querySelectorAll('.cal button[data-id]').forEach(function(b){var d=b.dataset.id;if(!/^\d{4}-\d\d-\d\d$/.test(d))return;if(!(b.classList.contains('pd')||b.classList.contains('ov')||b.classList.contains('fw')))return;if(cycReal(d))return;if(S.cyc.pause||(f0&&d<f0)||((S.cyc.nop||{})[d])){b.classList.remove('pd','ov','fw');var cn=b.querySelector('.cn');if(cn)cn.remove();var mk=b.querySelector('.pd-mk');if(mk)mk.remove()}})}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -161,7 +164,7 @@ function icsBuild(o){var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LAYNOOR//
   if(/^\d\d:\d\d$/.test(time||'')){var m=+time.slice(0,2)*60+ +time.slice(3)+mins,ed=m>=1440?addD(date,1):date;L.push('DTSTART:'+ds(date)+'T'+time.replace(':','')+'00','DTEND:'+ds(ed)+'T'+z(Math.floor(m/60)%24)+z(m%60)+'00')}
   else L.push('DTSTART;VALUE=DATE:'+ds(date),'DTEND;VALUE=DATE:'+ds(addD(date,1)));
   L.push('END:VEVENT')}
- if(o.ev)S.ev.forEach(function(e){if(e.date&&e.t)ev('ev-'+e.id,e.t,e.date,e.time||'',60)});
+ if(o.ev)S.ev.forEach(function(e){if(e.date&&e.t&&e.src!=='tg'&&e.src!=='gh')ev('ev-'+e.id,e.t,e.date,e.time||'',60)});
  if(o.fast)for(var i=0;i<90;i++){var d=addD(today,i),x=fi(d);if(x.no)continue;var t=x.ram?'Ramadan':x.jb?'Jeûne recommandé (jour blanc)':x.lj?'Jeûne recommandé (lundi ou jeudi)':'';if(t)ev('fast-'+d,t,d,'',0)}
  if(o.pr)for(var j=0;j<7;j++){var dd=addD(today,j),tt=times(new Date(dd+'T12:00'),S.loc.lat,S.loc.lng,S.ang);P.forEach(function(q){var f=fmt(tt[q]);if(/^\d\d:\d\d$/.test(f))ev('pr-'+dd+'-'+q,'Prière · '+PF[q],dd,f,20)})}
  if(o.kahf)for(var w=0;w<13;w++){var fd2=addD(today,w*7+((5-new Date(today+'T12:00').getDay()+7)%7));ev('kahf-'+fd2,'Sourate Al-Kahf (vendredi)',fd2,'',0)}
@@ -800,18 +803,42 @@ function cycleTop(){var I=cyI(),tg=tgInfo(),h='';
 var _cv=cycleView;cycleView=function(){var h=_cv(),t=lgd(csel),cards=h.split(/(?=<div class="card")/),pick=function(m){return cards.filter(function(c){return c.indexOf(m)>-1})[0]||''},
  cal=pick('data-a="cmon"'),day=pick('Intensité de la douleur'),temp=pick('<h3>Température et glaire cervicale</h3>'),mood=pick('<h3>Humeur et notes</h3>'),stats=pick('<h3>Mon cycle en chiffres</h3>');
  if(!t.bt){day=day.replace(/<div class="mut" style="margin-top:10px">Intensité du flux<\/div>[\s\S]*?(?=<div class="mut" style="margin-top:10px">Intensité de la douleur<\/div>)/,'').replace(/<div class="mut" style="margin-top:10px">Présence de caillots<\/div><div class="row">[\s\S]*?<\/div>/,'')}
+ var hid=cycHidden(csel),retire='';if(hid)day=day.replace(/ • Jour \d+ du cycle/,'').replace(/<p class="mut" style="margin:0 0 6px">[^<]*<\/p>/,'');else if(cf(csel).p&&t.bt!=='Règles')retire='<div class="card" style="background:var(--rose)"><div class="mut">Ce jour est marqué comme règles par l’app (prévision ou date de début enregistrée), mais tu n’as rien noté ici.</div><div class="row wrap" style="margin-top:8px"><button class="btn r" data-a="nopon">Retirer cette prévision</button><button class="btn r" data-a="cpause">Mettre toutes les prévisions en pause</button></div></div>';
  var ec=t.rap==='Non protégé'&&difD(today,csel)>=0&&difD(today,csel)<=5?'<p class="mut" style="font-size:12px">Contraception d’urgence possible jusqu’à 3 jours après le rapport (lévonorgestrel) ou 5 jours (ulipristal), en pharmacie.</p>':'',
  rap='<div class="card"><h3>Rapports</h3><div class="row wrap">'+chp('rap','Non protégé',t.rap==='Non protégé')+chp('rap','Protégé',t.rap==='Protégé')+'</div>'+ec+'<div class="row" style="margin-top:10px"><button class="btn '+(S.tgRem?'d':'')+'" data-a="tgtog">🔔 Rappel de test de grossesse : '+(S.tgRem?'activé':'désactivé')+'</button></div><p class="mut" style="font-size:12px">Après un rapport non protégé sans règles enregistrées ensuite, un rappel apparaît au calendrier à J+10 et J+15 (« Rappel perso »). Ce suivi ne remplace ni une contraception ni un avis médical.</p></div>',
  st=stats?'<div class="card"><details><summary><b>Mon cycle en chiffres</b></summary>'+stats.replace('<div class="card"><h3>Mon cycle en chiffres</h3>','').replace(/<\/div>\s*$/,'')+'</details></div>':'';
- return cycleTop()+cal+day+mood+rap+symCard(t)+temp+st};
+ return cycleTop()+cal+day+retire+mood+rap+symCard(t)+temp+st};
 var _cl=act.cl;act.cl=function(id){_cl(id);if(id.indexOf('bt|')===0)btSync();if(id.indexOf('rap|')===0)syncTg()};
 function btSync(){var t=lgd(csel),L=S.cyc.log||{},c=S.cyc;c.hist=c.hist||[];
  if(t.bt==='Règles'){var pv=addD(csel,-1),nx=addD(csel,1),k=c.hist.indexOf(nx);if(!(L[pv]&&L[pv].bt==='Règles')&&c.hist.indexOf(csel)<0)c.hist.push(csel);if(L[nx]&&L[nx].bt==='Règles'&&k>-1)c.hist.splice(k,1)}
  else{var k2=c.hist.indexOf(csel);if(k2>-1){c.hist.splice(k2,1);var nx2=addD(csel,1);if(L[nx2]&&L[nx2].bt==='Règles')c.hist.push(nx2)}}
- cyAuto();var s=c.hist.slice().sort().pop();if(s){var n=0;while(L[addD(s,n)]&&L[addD(s,n)].bt==='Règles')n++;if(n>=2&&n<=12)c.dur=n}syncTg()}
+ cyAuto();var s=c.hist.slice().sort().pop();if(s){var n=0;while(L[addD(s,n)]&&L[addD(s,n)].bt==='Règles')n++;if(n>=2&&n<=12)c.dur=n}syncTg();try{syncGh()}catch(e){}}
 act.tgtog=function(){S.tgRem=!S.tgRem;syncTg()};
 var _og2=V.org;V.org=function(){syncTg();return _og2()};
 syncTg();
+
+/* ===== Cycle : retirer des prévisions, pause, rappel ghusl ===== */
+function cycReal(d){var c=S.cyc,L=(c.log||{})[d];if(L&&L.bt==='Règles')return true;if((c.nop||{})[d])return false;var D=c.dur||5;return anchors().some(function(a){return a<=d&&d<=addD(a,D-1)&&a<=today})}
+function cycLogged(d){var L=(S.cyc.log||{})[d];return!!(L&&L.bt==='Règles')}
+function cycHidden(d){var c=S.cyc,A=anchors();return !cycReal(d)&&!!(c.pause||(A.length&&d<A[0])||(c.nop||{})[d])}
+act.nopon=function(){var c=S.cyc;c.nop=c.nop||{};var run=[csel],x=addD(csel,-1),k=0;while(cf(x).p&&!cycLogged(x)&&k++<20){run.unshift(x);x=addD(x,-1)}x=addD(csel,1);k=0;while(cf(x).p&&!cycLogged(x)&&k++<20){run.push(x);x=addD(x,1)}
+ run.forEach(function(d){c.nop[d]=1});c.hist=(c.hist||[]).filter(function(a){return run.indexOf(a)<0});cyAuto();if(!c.hist.length)c.start='';syncGh();syncTg()};
+act.cpause=function(){S.cyc.pause=!S.cyc.pause;syncGh()};
+act.ghtog=function(){S.ghRem=S.ghRem===false?true:false;syncGh()};
+function ghRuns(){var c=S.cyc,L=c.log||{},D=c.dur||5,out=[];anchors().filter(function(a){return!(c.nop||{})[a]&&a<=today}).forEach(function(a){var n=0;while(L[addD(a,n)]&&L[addD(a,n)].bt==='Règles')n++;var ongoing=n>0&&addD(a,n-1)>=today,len=(ongoing||n===0)?Math.max(n,D):n;out.push({d:addD(a,len),pred:ongoing||(n===0&&addD(a,D)>=today)})});return out}
+function syncGh(){S.ev=(S.ev||[]).filter(function(e){return e.src!=='gh'});if(S.ghRem===false||!S.cyc)return;var c=S.cyc,rs=ghRuns();
+ if(!c.pause){var I=cyI();if(I&&I.nxs)rs.push({d:addD(I.nxs,c.dur||5),pred:true})}
+ var seen={};rs.forEach(function(r){if(seen[r.d]||r.d<addD(today,-60)||r.d>addD(today,120))return;seen[r.d]=1;S.ev.push({id:'gh-'+r.d,t:r.pred?'🚿 Grandes ablutions (prévu)':'🚿 Grandes ablutions (ghusl)',date:r.d,time:'',src:'gh'})})}
+function cycleTop(){var I=S.cyc.pause?null:cyI(),tg=tgInfo(),h;
+ if(S.cyc.pause)h='<div class="card"><h3>Prévisions en pause</h3><p class="mut">Seules les règles que tu notes apparaissent dans le calendrier (retour de couches, allaitement, cycles irréguliers…). Tu peux reprendre les prévisions quand tu veux.</p></div>';
+ else if(!I)h='<div class="card"><h3>Ta période actuelle</h3><p class="mut">Touche un jour dans le calendrier ci-dessous et note « Règles » dans Saignement : LAYNOOR calculera ta période actuelle, tes prochaines règles et ton ovulation probable.</p></div>';
+ else{var ov=addD(I.last,I.o),dOv=difD(ov,today),ms=[];
+  ms.push(I.dn<0?'Règles en retard de '+(-I.dn)+' jour'+(-I.dn>1?'s':''):I.dn===0?'Règles prévues aujourd’hui':I.dn<=2?'Règles imminentes (dans '+I.dn+' jour'+(I.dn>1?'s':'')+')':'Règles prévues dans '+I.dn+' jours (vers le '+fd(I.nxs)+')');
+  if(dOv>0&&dOv<=14)ms.push('Ovulation probable dans '+dOv+' jour'+(dOv>1?'s':'')+' (vers le '+fd(ov)+')');else if(dOv===0)ms.push('Ovulation probable aujourd’hui');
+  h='<div class="card" style="background:var(--rose)"><div class="mut">Ta période actuelle · jour '+I.day+' du cycle</div><h2 style="margin:4px 0 6px">'+I.ph+'</h2><p style="margin:0 0 6px"><b>'+I.ch+'</b></p>'+ms.map(function(m){return'<div>• '+m+'</div>'}).join('')+sBar(Math.min(100,I.day/I.L*100))+'<div class="mut" style="font-size:12px">Estimations à environ ± 2 jours près, d’après tes derniers cycles. Elles ne remplacent pas un avis médical.</div></div>'}
+ return h+'<div class="row wrap" style="margin:-4px 0 12px"><button class="btn r" data-a="cpause" style="font-size:12px;padding:6px 12px">'+(S.cyc.pause?'▶ Reprendre les prévisions':'⏸ Mettre les prévisions en pause')+'</button><button class="btn r" data-a="ghtog" style="font-size:12px;padding:6px 12px">🚿 Rappel ghusl : '+(S.ghRem===false?'désactivé':'activé')+'</button></div>'+(tg?tgCard(tg):'')}
+var _og3=V.org;V.org=function(){try{syncGh()}catch(e){}return _og3()};
+try{syncGh()}catch(e){}
 
 draw();
 })();
