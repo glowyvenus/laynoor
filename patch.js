@@ -119,6 +119,14 @@ function enhance(){
  document.querySelectorAll('.cal:not(.ecal)>button.pd').forEach(function(b){if(!b.querySelector('.pd-mk'))b.insertAdjacentHTML('beforeend','<i class="pd-mk"></i>')});
  var ic=document.getElementById('ics-card');if(ic&&!ic.dataset.t){ic.dataset.t=1;var ih=ic.firstElementChild;if(ih&&ih.tagName==='H3'){var wr=document.createElement('div');wr.className='row sp';ih.parentNode.insertBefore(wr,ih);wr.appendChild(ih);ih.style.margin='0';wr.insertAdjacentHTML('beforeend','<button class="btn" data-a="icsh" style="padding:4px 12px;font-size:12px">'+(S.icsShow?'Masquer':'Afficher')+'</button>');if(!S.icsShow)Array.prototype.slice.call(ic.children).forEach(function(c){if(c!==wr)c.style.display='none'})}}
  if(['org','home','well'].indexOf(page)>-1&&S.cyc){var A0=anchors(),f0=A0[0];document.querySelectorAll('.cal button[data-id]').forEach(function(b){var d=b.dataset.id;if(!/^\d{4}-\d\d-\d\d$/.test(d))return;if(!(b.classList.contains('pd')||b.classList.contains('ov')||b.classList.contains('fw')))return;if(cycReal(d))return;if(S.cyc.pause||(f0&&d<f0)||((S.cyc.nop||{})[d])){b.classList.remove('pd','ov','fw');var cn=b.querySelector('.cn');if(cn)cn.remove();var mk=b.querySelector('.pd-mk');if(mk)mk.remove()}})}
+ if(S.cyc)document.querySelectorAll('.cal button[data-id]').forEach(function(b){var d=b.dataset.id;if(/^\d{4}-\d\d-\d\d$/.test(d)&&cycLogged(d)){if(!b.classList.contains('pd'))b.classList.add('pd');if(!b.closest('.ecal')&&!b.querySelector('.pd-mk'))b.insertAdjacentHTML('beforeend','<i class="pd-mk"></i>')}});
+ if(page==='home'&&S.cyc&&inPeriod()&&!document.getElementById('per-home')){var prw=A.querySelector('.pr');
+  if(prw){prw.insertAdjacentHTML('beforebegin','<div id="per-home">'+periodHome()+'</div>');prw.remove()}
+  var hr3=A.querySelector('.hero');if(hr3)hr3.querySelectorAll('.row.sp,.bar').forEach(function(e){e.remove()});
+  var cp=A.querySelector('.cal'),cpc=cp&&cp.closest('.card');if(cpc)cpc.querySelectorAll('p.mut').forEach(function(q){if(q.textContent.indexOf('Prochaine prière')===0)q.remove()})}
+ if(page==='home'){var hmh=Array.prototype.slice.call(A.querySelectorAll('.card h3')).filter(function(h){return h.textContent.trim()==='Humeur'})[0],hmc=hmh&&hmh.closest('.card');
+  if(hmc&&!hmc.querySelector('[data-n="gr"]'))hmc.insertAdjacentHTML('beforeend','<div class="mut" style="margin-top:12px">Gratitude du jour 🤍</div><textarea data-n="gr" rows="2" placeholder="Aujourd’hui, je remercie Allah pour…">'+esc((S.grat||{})[today]||'')+'</textarea>');
+  var sb=document.getElementById('sr-btn');if(sb)A.appendChild(sb)}
  if(page==='set')document.querySelectorAll('.it').forEach(function(it){var s=it.querySelectorAll('span');if(s[0]&&s[0].textContent==='Météo'&&s[1])s[1].textContent='actif'});
 }
 var _d=draw,lastKey='';
@@ -508,9 +516,9 @@ function astucesView(){var T=[
  +'<div class="card"><h3>Mini-routine de la semaine</h3><p class="mut">Une idée souple, à adapter : une petite zone par jour.</p>'+W.map(function(w){return'<div class="it"><b style="width:84px">'+w[0]+'</b><span>'+w[1]+'</span></div>'}).join('')+'</div>'
  +'<div class="card"><h3>Mes astuces</h3>'+(my.map(function(x){return'<div class="it"><span>'+esc(x.t)+'</span><button class="x" data-a="tipdel" data-id="'+x.id+'" aria-label="Supprimer">×</button></div>'}).join('')||'<p class="mut">Ajoute tes propres astuces ici.</p>')+'<div class="row" style="margin-top:10px"><input id="tip-n" placeholder="Une astuce à garder…"><button class="btn d" data-a="tipadd" aria-label="Ajouter">+</button></div></div>'
  +'<div class="card" style="background:var(--rose)"><h3>Sécurité</h3>'+ol(['Ne mélange jamais la javel avec du vinaigre, de l’ammoniaque ou un produit acide : cela dégage un gaz toxique.','Aère la pièce quand tu nettoies et mets des gants.','Range tous les produits hors de portée des enfants, dans leur flacon d’origine, jamais dans une bouteille d’eau.','En cas d’ingestion ou d’inhalation, appelle le 15 ou ton centre antipoison.'])+'</div>'}
-V.fam=function(){if(['astuces','dates','pharma','lait'].indexOf(sub.fam)<0)sub.fam='astuces';
- return'<h2>Foyer</h2>'+tabs('fam',[['astuces','Astuces'],['dates','Dates'],['pharma','Pharmacie'],['lait','Stock de lait']])+(sub.fam==='lait'?laitView('stock'):sub.fam==='pharma'?V.famBody('pharma'):sub.fam==='dates'?datesView():astucesView())};
-sub.fam='astuces';
+V.fam=function(){if(['astuces','dates','pharma','lait'].indexOf(sub.fam)<0)sub.fam='pharma';
+ return'<h2>Foyer</h2>'+tabs('fam',[['pharma','Pharmacie'],['lait','Stock de lait'],['dates','Dates'],['astuces','Astuces']])+(sub.fam==='lait'?laitView('stock'):sub.fam==='pharma'?V.famBody('pharma'):sub.fam==='dates'?datesView():astucesView())};
+sub.fam='pharma';
 
 /* --- Goutte de lait interactive --- */
 function adjLait(d){if(!d)return;var L=S.lait,now=Date.now();
@@ -679,12 +687,12 @@ menuLogSync();
 act.stadd=function(id){var o=(S.ingStat||{})[id];if(!o)return;var r=shopAdd({name:o.n,n:null,u:''},'stat','');stMsg=r==='new'?'« '+o.n+' » ajouté à la liste de courses.':'« '+o.n+' » est déjà dans la liste de courses.'};
 function statView(){menuLogSync();var h='',f0=prFirst(),win=f0?Math.min(30,difD(today,f0)+1):0;
  if(!win)h+=sec('🕌 Prières','<p class="mut">Coche tes prières sur l’accueil : les statistiques apparaîtront ici.</p>');
- else{var ds=dayList(win),tot=0,per={};P.forEach(function(q){per[q]=0});ds.forEach(function(d){var o=S.pr[d]||{};P.forEach(function(q){if(o[q]){tot++;per[q]++}})});
-  var d7=dayList(Math.min(7,win)),t7=0;d7.forEach(function(d){t7+=prCount(d)});
-  var run=0,best=0,x=f0;while(x<=today){run=prCount(x)===5?run+1:0;if(run>best)best=run;x=addD(x,1)}
-  var cur=0,s0=prCount(today)===5?today:addD(today,-1);while(s0>=f0&&prCount(s0)===5){cur++;s0=addD(s0,-1)}
-  var arr=P.map(function(q){return[q,per[q]/win*100]}).sort(function(a,b){return b[1]-a[1]});
-  h+=sec('🕌 Prières',srow('Moyenne (7 derniers jours)',f1(t7/d7.length)+' / 5')+srow('Moyenne ('+win+' dernier'+(win>1?'s jours':' jour')+')',f1(tot/win)+' / 5')+srow('Série de jours complets',cur+' j (record '+best+' j)')+'<div style="margin-top:10px">'+P.map(function(q){var v=per[q]/win*100;return'<div class="row sp"><span>'+PF[q]+'</span><span class="mut">'+Math.round(v)+' %</span></div>'+sBar(v)}).join('')+'</div><p class="mut" style="font-size:12px">La plus régulière : '+PF[arr[0][0]]+' · à renforcer : '+PF[arr[arr.length-1][0]]+'.</p>')}
+ else{var ds=dayList(win).filter(function(d){return!cycOff(d)}),nw=ds.length||1,tot=0,per={};P.forEach(function(q){per[q]=0});ds.forEach(function(d){var o=S.pr[d]||{};P.forEach(function(q){if(o[q]){tot++;per[q]++}})});
+  var d7=dayList(Math.min(7,win)).filter(function(d){return!cycOff(d)}),t7=0;d7.forEach(function(d){t7+=prCount(d)});
+  var run=0,best=0,x=f0;while(x<=today){if(!cycOff(x)){run=prCount(x)===5?run+1:0;if(run>best)best=run}x=addD(x,1)}
+  var cur=0,s0=(prCount(today)===5||cycOff(today))?today:addD(today,-1);while(s0>=f0&&(prCount(s0)===5||cycOff(s0))){if(!cycOff(s0))cur++;s0=addD(s0,-1)}
+  var arr=P.map(function(q){return[q,per[q]/nw*100]}).sort(function(a,b){return b[1]-a[1]});
+  h+=sec('🕌 Prières',srow('Moyenne (7 derniers jours)',f1(t7/(d7.length||1))+' / 5')+srow('Moyenne ('+win+' dernier'+(win>1?'s jours':' jour')+')',f1(tot/nw)+' / 5')+srow('Série de jours complets',cur+' j (record '+best+' j)')+'<div style="margin-top:10px">'+P.map(function(q){var v=per[q]/nw*100;return'<div class="row sp"><span>'+PF[q]+'</span><span class="mut">'+Math.round(v)+' %</span></div>'+sBar(v)}).join('')+'</div><p class="mut" style="font-size:12px">La plus régulière : '+PF[arr[0][0]]+' · à renforcer : '+PF[arr[arr.length-1][0]]+'.'+(win>nw?' Les jours de règles ne sont pas comptés.':'')+'</p>')}
  var dt=(S.dk&&S.dk.tot)||{},dk=Object.keys(dt).filter(function(d){return dt[d]>0}),sum=0,bD=0,bDt='';dk.forEach(function(d){sum+=dt[d];if(dt[d]>bD){bD=dt[d];bDt=d}});
  var l7=dayList(7),mx=Math.max.apply(null,l7.map(function(d){return dt[d]||0}).concat([1]));
  h+=sec('📿 Dhikr',dk.length?srow('Total',sum)+srow('Moyenne par jour de dhikr',f1(sum/dk.length))+srow('Meilleur jour',bD+' ('+fd(bDt)+')')+'<div style="display:flex;gap:6px;align-items:flex-end;height:74px;margin-top:10px">'+l7.map(function(d){var v=dt[d]||0;return'<div style="flex:1;text-align:center"><div style="height:'+Math.round(v/mx*50)+'px;background:var(--sage2);border-radius:6px 6px 0 0"></div><div class="mut" style="font-size:10px">'+'LMMJVSD'[(new Date(d+'T12:00').getDay()+6)%7]+'</div></div>'}).join('')+'</div><p class="mut" style="font-size:12px">Les 7 derniers jours.</p>':'<p class="mut">Utilise le compteur de dhikr : les statistiques apparaîtront ici.</p>');
@@ -807,7 +815,7 @@ var _cv=cycleView;cycleView=function(){var h=_cv(),t=lgd(csel),cards=h.split(/(?
  var ec=t.rap==='Non protégé'&&difD(today,csel)>=0&&difD(today,csel)<=5?'<p class="mut" style="font-size:12px">Contraception d’urgence possible jusqu’à 3 jours après le rapport (lévonorgestrel) ou 5 jours (ulipristal), en pharmacie.</p>':'',
  rap='<div class="card"><h3>Rapports</h3><div class="row wrap">'+chp('rap','Non protégé',t.rap==='Non protégé')+chp('rap','Protégé',t.rap==='Protégé')+'</div>'+ec+'<div class="row" style="margin-top:10px"><button class="btn '+(S.tgRem?'d':'')+'" data-a="tgtog">🔔 Rappel de test de grossesse : '+(S.tgRem?'activé':'désactivé')+'</button></div><p class="mut" style="font-size:12px">Après un rapport non protégé sans règles enregistrées ensuite, un rappel apparaît au calendrier à J+10 et J+15 (« Rappel perso »). Ce suivi ne remplace ni une contraception ni un avis médical.</p></div>',
  st=stats?'<div class="card"><details><summary><b>Mon cycle en chiffres</b></summary>'+stats.replace('<div class="card"><h3>Mon cycle en chiffres</h3>','').replace(/<\/div>\s*$/,'')+'</details></div>':'';
- return cycleTop()+cal+day+retire+mood+rap+symCard(t)+temp+st};
+ return cal+cycleTop()+day+retire+mood+rap+symCard(t)+temp+st};
 var _cl=act.cl;act.cl=function(id){_cl(id);if(id.indexOf('bt|')===0)btSync();if(id.indexOf('rap|')===0)syncTg()};
 function btSync(){var t=lgd(csel),L=S.cyc.log||{},c=S.cyc;c.hist=c.hist||[];
  if(t.bt==='Règles'){var pv=addD(csel,-1),nx=addD(csel,1),k=c.hist.indexOf(nx);if(!(L[pv]&&L[pv].bt==='Règles')&&c.hist.indexOf(csel)<0)c.hist.push(csel);if(L[nx]&&L[nx].bt==='Règles'&&k>-1)c.hist.splice(k,1)}
@@ -839,6 +847,65 @@ function cycleTop(){var I=S.cyc.pause?null:cyI(),tg=tgInfo(),h;
  return h+'<div class="row wrap" style="margin:-4px 0 12px"><button class="btn r" data-a="cpause" style="font-size:12px;padding:6px 12px">'+(S.cyc.pause?'▶ Reprendre les prévisions':'⏸ Mettre les prévisions en pause')+'</button><button class="btn r" data-a="ghtog" style="font-size:12px;padding:6px 12px">🚿 Rappel ghusl : '+(S.ghRem===false?'désactivé':'activé')+'</button></div>'+(tg?tgCard(tg):'')}
 var _og3=V.org;V.org=function(){try{syncGh()}catch(e){}return _og3()};
 try{syncGh()}catch(e){}
+
+/* ===== Accueil en forme de cœur, règles à l'accueil, écran, dua ===== */
+(function(){var svg="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M50 9C47 3 42 0 33 0L14 0C5 0 0 4 0 12L0 80C0 90 22 97 50 100C78 97 100 90 100 80L100 12C100 4 95 0 86 0L67 0C58 0 53 3 50 9Z'/></svg>",u='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")',s=document.createElement('style');
+ s.textContent='.hero{border-radius:0!important;padding:36px 26px 76px!important;-webkit-mask:'+u+' center/100% 100% no-repeat;mask:'+u+' center/100% 100% no-repeat}';document.head.appendChild(s)})();
+function cycOff(d){return!!S.cyc&&cycReal(d)}
+function inPeriod(){return!!S.cyc&&cycReal(today)}
+act.gotab=function(id){var q=id.split('|');page=q[0];sub[q[0]]=q[1];menuOpen=false;scrollTo(0,0)};
+function periodHome(){var li=function(a){return'<ul style="margin:6px 0;padding-left:20px">'+a.map(function(x){return'<li style="margin:4px 0">'+x+'</li>'}).join('')+'</ul>'};
+ return'<div class="card" style="background:var(--sage)"><b>🌙 Tu es en période de règles</b><p class="mut" style="margin:6px 0 0">La prière et le jeûne ne sont pas dus pendant les règles. Les jours de jeûne se rattrapent, pas les prières (Bukhari et Muslim, hadith de ‘Aïcha).</p></div>'+cycleTop()
+ +'<div class="card"><details open><summary><b>🤍 Rester proche d’Allah pendant les règles</b></summary><div class="mut" style="margin-top:8px">Ce qui reste permis</div>'+li(['Le dhikr (Subhanallah, Alhamdulillah, Allahu akbar…) et l’istighfar','Les invocations (dua) et dire « Âmîn »','Écouter le Coran, des cours et des rappels','Lire un tafsir ou une traduction du Coran','La sadaqa, rendre service, bien parler','Assister au rassemblement de l’Aïd, en restant à l’écart du lieu de prière (Bukhari et Muslim)'])
+ +'<div class="mut">Avis partagés : demande à une personne de science</div>'+li(['Réciter le Coran de mémoire : la majorité le déconseille à voix haute ; les malikites, un avis de l’imam Ahmad, Ibn Taymiyya, Ibn Baz et Ibn ‘Uthaymin le permettent, surtout pour ne pas oublier. Lire des yeux ou méditer ne pose pas de problème.','Toucher le mushaf : à éviter ; une traduction ou un écran sont permis selon les avis.','Entrer dans la mosquée : avis partagés.'])
+ +'<div class="mut">Pas pendant les règles</div>'+li(['La prière, le jeûne, le tawaf et les rapports conjugaux (Coran 2:222)'])
+ +'<div class="mut">À la fin des règles</div>'+li(['Faire le ghusl, puis reprendre la prière','Rattraper les jours de jeûne manqués, pas les prières'])
+ +'<div class="row wrap" style="margin-top:8px"><button class="btn" data-a="gotab" data-id="islam|dhikr">📿 Dhikr</button><button class="btn" data-a="gotab" data-id="org|dua">🤲 Mes dua</button><button class="btn" data-a="gotab" data-id="islam|rappels">🌙 Rappel du jour</button></div>'
+ +'<p class="mut" style="font-size:12px">Sources : IslamQA (réponses 70438, 5048, 152742, 4862) et IslamWeb.</p></details></div>'}
+
+/* --- Écran : dessins animés calmes --- */
+var _ecv=ecranView;ecranView=function(){var h=_ecv(),i=h.indexOf('<div class="card"><h3>Dessins animés au rythme calme</h3>'),L=[['Petit Ours Brun','12 images/s, très lent'],['Simon','12 images/s, graphisme simple'],['T’choupi','12 à 24 images/s, stable'],['Mouk','24 images/s, rythme lent'],['Les Octonautes','24 images/s mais très calme'],['Bluey (mention spéciale)','25 images/s, rythme calme, couleurs douces, beaucoup de relationnel, des émotions vraies, du jeu libre'],['Le Village de Dany',''],['Lucas l’araignée','']];
+ return(i>-1?h.slice(0,i):h)+'<div class="card"><h3>Dessins animés au rythme calme</h3><p class="mut">Des exemples souvent cités pour leur douceur. Regarde toujours un épisode avant pour vérifier qu’il te convient.</p>'+L.map(function(x){return'<div class="it"><span>🌿 <b>'+x[0]+'</b>'+(x[1]?'<div class="mut" style="font-size:13px">'+x[1]+'</div>':'')+'</span></div>'}).join('')
+ +'<p class="mut" style="font-size:12px">Les chiffres d’images par seconde (FPS) viennent d’une publication de Snoez’Up Academy (déc. 2025) et ne sont pas vérifiés par une source officielle. L’idée : des dessins animés lents, avec des pauses visuelles, qui respectent la vitesse de traitement du cerveau et favorisent le calme. Même calmes, les écrans restent déconseillés avant 3 ans.</p></div>'};
+
+/* --- Organisation : dua à faire avec force --- */
+var DM=[['nuit','Dernier tiers de la nuit','Allah descend au ciel le plus bas et appelle : « Qui M’invoque, que Je l’exauce ? ». Réveille-toi, fais tes ablutions, prie quelques rak‘ahs puis demande.','Bukhari et Muslim'],
+['sujud','Dans la prosternation (sujud)','Le serviteur est le plus proche de son Seigneur quand il est prosterné : multiplie les invocations.','Muslim'],
+['adhan','Entre l’adhan et l’iqama','L’invocation faite entre l’appel à la prière et le second appel n’est pas rejetée.','Abu Dawud, Tirmidhi, An-Nasa’i'],
+['apres','Après les prières obligatoires','Avant et après le salut final des cinq prières, l’invocation est recommandée.','Tirmidhi'],
+['vendredi','Vendredi : une heure précise','Il y a un moment le vendredi où l’invocation est exaucée. Selon l’avis le plus probable, c’est la fin de l’après-midi, avant le coucher du soleil.','Bukhari et Muslim'],
+['pluie','Quand il pleut','Invoquer sous la pluie est recommandé. Dis : « Allâhumma sayyiban nâfi‘â » (Ô Allah, une pluie bénéfique). L’authenticité de certains récits sur ce moment est discutée, mais beaucoup de savants le retiennent.','Bukhari (invocation), IslamQA'],
+['arafat','Jour d’Arafat','Le meilleur dou‘a est celui du jour d’Arafat, pour les pèlerins comme pour ceux qui sont chez eux.','Tirmidhi'],
+['mecque','À La Mecque (omra, hajj)','Invocation pendant le tawaf, sur Safa et Marwa, entre les deux, et en buvant l’eau de Zamzam avec une intention sincère.','IslamQA'],
+['voyage','En voyage','L’invocation du voyageur fait partie de celles qui sont exaucées.','Abu Dawud, Tirmidhi'],
+['injustice','Quand on subit une injustice','L’invocation de la personne qui subit une injustice est exaucée.','Bukhari et Muslim'],
+['parent','Parent pour son enfant','L’invocation d’un parent pour son enfant est exaucée.','Abu Dawud, Tirmidhi'],
+['absent','Pour un proche, en son absence','Quand tu invoques pour quelqu’un qui est absent, un ange dit « et pour toi la pareille ».','Muslim'],
+['qadr','Nuit du destin (Laylat al-Qadr)','Dans les dix dernières nuits de Ramadan, le Prophète ﷺ a enseigné à ‘Aïcha : « Allâhumma innaka ‘afuwwun tuhibbu l-‘afwa fa‘fu ‘annî ».','Tirmidhi, Ibn Majah'],
+['autre','Autre moment','Une dua peut se faire à tout moment : choisis ton propre moment.','']];
+var DPM='nuit';
+function dpSync(){S.ev=(S.ev||[]).filter(function(e){return e.src!=='dp'});(S.dp||[]).forEach(function(x){if(x.d&&!x.done)S.ev.push({id:'dp-'+x.id,t:'🤲 Dua : '+(x.t.length>40?x.t.slice(0,40)+'…':x.t),date:x.d,time:'',src:'dp'})})}
+function duaPlanView(){var L=S.dp||[];
+ var h='<div class="card"><h3>Mes dua à faire avec force</h3><p class="mut">Note ici les dua que tu veux faire avec toute ta force, et choisis le moment propice : la nuit, sous la pluie, en voyage, à La Mecque… Quand le moment arrive, tu les retrouves ici. Coche « faite » puis « exaucée » pour garder une trace.</p>'
+ +'<div class="mut">Comment t’organiser</div>'+ol(['Écris ta dua et choisis le moment.','Prépare-toi : ablutions, face à la qibla si possible, louange à Allah et prière sur le Prophète ﷺ avant de demander.','Demande avec certitude et en insistant, sans te presser : « L’invocation de l’un de vous est exaucée tant qu’il ne se presse pas » (Bukhari et Muslim).','Remercie Allah, puis note le résultat.'])+'</div>'
+ +'<div class="card" id="dp-form"><h3>Ajouter une dua</h3><textarea id="dp-t" rows="2" placeholder="Ma dua, mon intention…"></textarea><div class="row wrap" style="margin-top:8px"><select id="dp-m" style="flex:1;min-width:180px">'+DM.map(function(m){return'<option value="'+m[0]+'" '+(DPM===m[0]?'selected':'')+'>'+m[1]+'</option>'}).join('')+'</select><input id="dp-d" type="date" style="flex:1;min-width:140px"></div><p class="mut" style="font-size:12px;margin:6px 0">La date est facultative : si tu en mets une (une omra, un voyage…), un rappel apparaît au calendrier.</p><button class="btn d" data-a="dpadd">Ajouter</button></div>';
+ var any=false;DM.forEach(function(m){var it=L.filter(function(x){return x.m===m[0]});if(!it.length)return;any=true;
+  h+='<div class="card"><h3>'+m[1]+'</h3>'+it.map(function(x){return'<div class="it" style="align-items:flex-start">'+heartBtn(x.done,'dpdone',x.id)+'<span>'+esc(x.t)+'<div class="mut" style="font-size:12px">'+(x.d?'le '+fd(x.d)+' · ':'')+(x.done?'faite':'à faire')+(x.ans?' · exaucée 🤍':'')+'</div></span><button class="x" data-a="dpans" data-id="'+x.id+'" aria-label="Exaucée">'+(x.ans?'🤍':'♡')+'</button><button class="x" data-a="dpdel" data-id="'+x.id+'" aria-label="Supprimer">×</button></div>'}).join('')+'</div>'});
+ if(!any)h+='<div class="card"><p class="mut">Aucune dua pour l’instant. Ajoute la première ♡</p></div>';
+ h+='<div class="card"><h3>Les moments propices</h3><p class="mut">Les moments où l’invocation est particulièrement recommandée. Touche « + » pour y ajouter une dua.</p>'+DM.filter(function(m){return m[0]!=='autre'}).map(function(m){return'<details><summary><b>'+m[1]+'</b></summary><p class="mut" style="font-size:14px">'+m[2]+'</p><div class="mut" style="font-size:12px">Source : '+m[3]+'</div><p><button class="btn" data-a="dpm" data-id="'+m[0]+'">+ Ajouter une dua ici</button></p></details>'}).join('')+'</div>'
+ +'<div class="card"><h3>Formules à connaître</h3><details><summary><b>Talbiya (en allant à La Mecque)</b></summary>'+bl('','لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ','Labbayka Llâhumma labbayk, labbayka lâ sharîka laka labbayk, inna l-hamda wa n-ni‘mata laka wa l-mulk, lâ sharîka lak','Me voici, ô Allah, me voici ! Me voici, Tu n’as pas d’associé, me voici ! À Toi la louange, le bienfait et la royauté ; Tu n’as pas d’associé. (Bukhari, Muslim)')+'</details>'
+ +'<details><summary><b>Jour d’Arafat</b></summary>'+bl('','لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ','Lâ ilâha illa Llâhu wahdahu lâ sharîka lah, lahu l-mulku wa lahu l-hamdu wa huwa ‘alâ kulli shay’in qadîr','Il n’y a de divinité qu’Allah, Seul, sans associé. À Lui la royauté et la louange, et Il est capable de toute chose. (Tirmidhi)')+'</details>'
+ +'<details><summary><b>Sous la pluie</b></summary>'+bl('','اللَّهُمَّ صَيِّبًا نَافِعًا','Allâhumma sayyiban nâfi‘â','Ô Allah, fais-en une pluie bénéfique. (Bukhari)')+'</details>'
+ +'<details><summary><b>Nuit du destin</b></summary>'+bl('','اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي','Allâhumma innaka ‘afuwwun tuhibbu l-‘afwa fa‘fu ‘annî','Ô Allah, Tu es Celui qui efface les fautes et Tu aimes pardonner : pardonne-moi. (Tirmidhi, Ibn Majah)')+'</details></div>';
+ return h}
+act.dpadd=function(){var t=document.getElementById('dp-t'),m=document.getElementById('dp-m'),d=document.getElementById('dp-d'),v=t&&t.value.trim();if(!v){alert('Écris ta dua.');return}S.dp=S.dp||[];S.dp.push({id:Date.now(),t:v,m:m?m.value:'autre',d:d?d.value:'',done:false,ans:false});DPM=m?m.value:DPM;dpSync()};
+act.dpdone=function(id){var x=(S.dp||[]).find(function(z){return z.id==id});if(x)x.done=!x.done;dpSync()};
+act.dpans=function(id){var x=(S.dp||[]).find(function(z){return z.id==id});if(x){x.ans=!x.ans;if(x.ans)x.done=true}dpSync()};
+act.dpdel=function(id){S.dp=(S.dp||[]).filter(function(z){return z.id!=id});dpSync()};
+act.dpm=function(id){DPM=id;setTimeout(function(){var f=document.getElementById('dp-form');if(f)f.scrollIntoView({behavior:'smooth'})},80)};
+SX.push(['Mes dua à faire avec force','org','dua','Organisation › Dua','dua invocation moment exauce pluie mecque omra hajj voyage arafat nuit sujud qadr force intentions']);
+var _og4=V.org;V.org=function(){try{dpSync()}catch(e){}var T=tabs('org',[['agenda','Calendrier'],['matrice','Matrice Eisenhower'],['dua','Dua']]);if(sub.org==='dua')return'<h2>Organisation</h2>'+T+duaPlanView();return _og4().replace(/<div class="tabs">[\s\S]*?<\/div>/,T)};
+try{dpSync()}catch(e){}
 
 draw();
 })();
